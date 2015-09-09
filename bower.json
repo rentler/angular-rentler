@@ -1,0 +1,16 @@
+{
+  "name": "rentler-angular",
+  "version": "1.0.0",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "angular": "~1.2",
+    "angular-mocks": "~1.2",
+    "lodash-compat": "~3.10.1"
+  }
+}
