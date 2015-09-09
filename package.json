@@ -1,5 +1,5 @@
 {
-  "name": "rentler-angular",
+  "name": "angular-rentler",
   "version": "1.0.0",
   "description": "Angular components for Rentler applications",
   "devDependencies": {
