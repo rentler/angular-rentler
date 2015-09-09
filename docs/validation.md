@@ -29,7 +29,7 @@ function UserFactory(Validatable) {
   };
 
   // Extend
-  _.assign(model, Validatable);
+  _.assignClone(model, Validatable);
 
   return model;
 }

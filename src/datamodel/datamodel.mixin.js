@@ -19,6 +19,17 @@
     DataModel.$inject = ['$q', '$http', '$injector'];
 
     function DataModel($q, $http, $injector) {
+      
+      var mixin = {
+        create: create,
+        get: get,
+        list: list,
+        save: save,
+        remove: remove,
+        progress: { }
+      };
+
+      return mixin;
 
       function create(options) {
         var _this = this;
@@ -181,17 +192,6 @@
     
         return query;
       }
-
-      var mixin = {
-        create: create,
-        get: get,
-        list: list,
-        save: save,
-        remove: remove,
-        progress: { }
-      };
-
-      return mixin;
     }
   }
 
