@@ -107,11 +107,13 @@
         _this.progress.save = true;
 
         var url = buildUrl(_this.url, null, _this);
+        
+        var data = _.pick(_this, _.keys(_this.schema));
 
         var promise = $http({
           method: 'POST',
           url: url,
-          data: _this
+          data: data
         })
         .then(function (response) {
           _.assign(_this, response.data);
