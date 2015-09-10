@@ -9,7 +9,8 @@ var gulp = require('gulp'),
   uglify = require('gulp-uglify'),
   sourcemaps = require('gulp-sourcemaps'),
   rename = require('gulp-rename'),
-  templateCache = require('gulp-angular-templatecache');
+  templateCache = require('gulp-angular-templatecache'),
+  angularFilesort = require('gulp-angular-filesort');
   
 var config = {
   tmp: '.tmp',
@@ -50,6 +51,7 @@ gulp.task('templates', function () {
 gulp.task('scripts', function () {
   var all = config.src.concat(['.tmp/**/*.js']);
   return gulp.src(all)
+    .pipe(angularFilesort())
     .pipe(concat(config.fileName))
     .pipe(gulp.dest(config.dest))
     .pipe(sourcemaps.init())
