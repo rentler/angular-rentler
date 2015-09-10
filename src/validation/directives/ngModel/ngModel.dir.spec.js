@@ -10,22 +10,22 @@
 	  Validatable = _Validatable_;
 	}));
 	
-    beforeEach(function () {
-      User = {
-        schema: {
-          firstName: {
-            required: true,
-            alphanumeric: {
-              message: function () {
-                return 'Custom function error';
-              }
+  beforeEach(function () {
+    User = {
+      schema: {
+        firstName: {
+          required: true,
+          alphanumeric: {
+            message: function () {
+              return 'Custom function error';
             }
           }
         }
-      };
-  
-      _.assign(User, _.cloneDeep(Validatable));
-    });
+      }
+    };
+
+    _.assign(User, _.cloneDeep(Validatable));
+  });
 	
 	beforeEach(inject(function ($compile, $rootScope) {
 	  $scope = $rootScope;

@@ -26,12 +26,12 @@
              !_.has(model, 'validation')) {
         i = _.lastIndexOf(bind, '.', i) - 1;
         path = bind.substring(0, i + 1);
-        model = _.extract(scope, path);
+        model = _.result(scope, path);
       }
       
       // No validation
       if (!_.has(model, 'validation')) return;
-
+      
       // Find field name
       var fieldName = _.last(bind.split('.'));
 
@@ -41,7 +41,7 @@
       scope.$watch(path, function () {
         // Not submitted no validation
         if (!ctrl.$submitted || !_.has(model.validation.errors, fieldName)) return;
-
+        
         // Get the number of errors for the field
         var length = model.validation.errors[fieldName].length;
         
