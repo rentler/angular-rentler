@@ -24,9 +24,9 @@
              !_.isFunction(model, 'validate')) {
         i = _.lastIndexOf(attrs.ngModel, '.', i) - 1;
         path = attrs.ngModel.substring(0, i + 1);
-        model = _.extract(scope, path);
+        model = _.result(scope, path);
       }
-
+      
       // Not validatable
       if (!_.has(model, 'validate')) return;
 
