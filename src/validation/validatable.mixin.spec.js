@@ -33,7 +33,7 @@ describe('Validatable', function () {
       }
     };
 
-    _.assign(user, Validatable);
+    _.assign(user, _.cloneDeep(Validatable));
   });
 
   it('should validate', function () {

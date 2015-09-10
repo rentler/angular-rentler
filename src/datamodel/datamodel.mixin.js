@@ -16,33 +16,22 @@
 
     this.$get = DataModel;
 
-    DataModel.$inject = ['$q', '$http', '$injector'];
+    DataModel.$inject = ['$q', '$http', '$injector', 'Instantiable'];
 
-    function DataModel($q, $http, $injector) {
+    function DataModel($q, $http, $injector, Instantiable) {
       
       var mixin = {
-        create: create,
         get: get,
         list: list,
         save: save,
         remove: remove,
+        relationalize: relationalize,
         progress: { }
       };
+      
+      _.assign(mixin, _.cloneDeep(Instantiable));
 
       return mixin;
-
-      function create(options) {
-        var _this = this;
-
-        var instance = _.cloneDeep(_this);
-        _.assign(instance, options);
-
-        relationize(instance);
-        
-        _.bindAll(instance);
-
-        return instance;
-      }
 
       function get(id) {
         var _this = this;
@@ -59,7 +48,7 @@
 
           _.assign(_this, response.data);
 
-          relationize(_this);
+          _this.relationalize();
 
           return _this;
         })
@@ -118,7 +107,7 @@
         .then(function (response) {
           _.assign(_this, response.data);
 
-          relationize(_this);
+          _this.relationalize();
 
           return _this;
         })
@@ -174,14 +163,16 @@
         return url;
       }
 
-      function relationize(model) {
-        if (!_.has(model, 'relations') || _.keys(model.relations).length === 0) return;
+      function relationalize() {
+        var _this = this;
+        
+        if (!_.has(_this, 'relations') || _.keys(_this.relations).length === 0) return;
 
-        _.forIn(model.relations, function (modelName, field) {
-          if (!_.has(model, field)) return;
+        _.forIn(_this.relations, function (modelName, field) {
+          if (!_.has(_this, field)) return;
 
           var datamodel = $injector.get(modelName);
-          model[field] = datamodel.create(model[field]);
+          _this[field] = datamodel.create(_this[field]);
         });
       }
       

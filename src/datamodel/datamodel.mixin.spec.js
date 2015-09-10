@@ -10,16 +10,6 @@ describe('DataModel', function () {
     $provide.factory('User', UserFactory);
 
     $provide.factory.$inject = ['DataModel'];
-    
-    function assignClone(dest) {
-      var args = arguments;
-  
-      _.forEach(args, function (src) {
-        _.assign(dest, _.cloneDeep(src));
-      });
-  
-      return dest;
-    }
 
     function UserFactory(DataModel) {
       var model = {
@@ -41,9 +31,7 @@ describe('DataModel', function () {
         }
       };
       
-      // FIX: This mixin needs to be global somehow
-      // FIX: When passing DataModel functions as callbacks context gets lost
-      assignClone(model, DataModel);
+      _.assign(model, _.cloneDeep(DataModel));
 
       return model;
     }
@@ -63,8 +51,8 @@ describe('DataModel', function () {
           return _this.address1;
         }
       };
-
-      assignClone(model, DataModel);
+      
+      _.assign(model, _.cloneDeep(DataModel));
 
       return model;
     }
@@ -85,7 +73,7 @@ describe('DataModel', function () {
       firstName: 'John',
       lastName: 'Doe'
     });
-
+    
     expect(user.firstName).toBe('John');
     expect(user.lastName).toBe('Doe');
   });
@@ -144,7 +132,7 @@ describe('DataModel', function () {
 
   it('should bridge relationships', function () {
     var user = User.create({ address: { address1: '1234 Sugar Lane' } });
-
+    user.relationalize();
     expect(user.address.url).toBeDefined();
     expect(user.address.simple).toBeDefined();
   });

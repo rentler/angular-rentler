@@ -4,16 +4,6 @@ describe('Model', function () {
   var User;
   
   beforeEach(module('rentler.core', function ($provide) {
-	  
-	function assignClone(dest) {
-      var args = arguments;
-  
-      _.forEach(args, function (src) {
-        _.assign(dest, _.cloneDeep(src));
-      });
-  
-      return dest;
-    }
 	
 	$provide.factory('User', UserFactory);
 	
@@ -21,16 +11,16 @@ describe('Model', function () {
 	
 	function UserFactory(Instantiable) {
 	  var model = {
-		fullName: function () {
-		  var _this = this;
-		  return _this.firstName + ' ' + _this.lastName;
-		}
-	  };
-	  
-	  assignClone(model, Instantiable);
-	  
-	  return model;
-	}
+      fullName: function () {
+          var _this = this;
+          return _this.firstName + ' ' + _this.lastName;
+        }
+      };
+      
+      _.assign(model, _.cloneDeep(Instantiable));
+      
+      return model;
+    }
   }));
   
   beforeEach(inject(function (_User_) {
