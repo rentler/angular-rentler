@@ -46,8 +46,8 @@
         var length = model.validation.errors[fieldName].length;
         
         // Add approriate classes
-        if (length === 0) element.removeClass(Validation.classes.error);
-        else if (length > 0) element.addClass(Validation.classes.error);
+        if (length === 0) element.removeClass(Validation.getClasses().error).addClass(Validation.getClasses().success);
+        else if (length > 0) element.addClass(Validation.getClasses().error).removeClass(Validation.getClasses().success);
       }, true);
     }
   }
