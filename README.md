@@ -1,6 +1,6 @@
 # angular-rentler
 Tools to help streamline angular applications. Includes data services and validation.
 
-[Data Modeling](docs/data.md)
+[Data Modeling](src/data/data.md)
 
-[Validation](docs/validation.md)
+[Validation](src/validation/validation.md)
