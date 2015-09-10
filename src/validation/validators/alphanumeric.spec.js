@@ -31,8 +31,7 @@
     it('should validate to true when options are false', function () {
       expect(AlphanumericValidator.validate(null, {}, false)).toBe(true);
     });
-
   });
 
-})();
+}());
 

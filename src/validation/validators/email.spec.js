@@ -25,7 +25,6 @@
     it('should validate to true when a multi-suffix email', function () {
       expect(EmailValidator.validate('japoppy.test@student.neumont.edu', {}, true)).toBe(true);
     });
-
   });
 
-})();
+}());
