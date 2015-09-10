@@ -11,11 +11,11 @@
     function validate(value, instance, opts) {
       if (!opts)
         return true;
-
+        
       if (_.isNumber(value))
         return true;
 
-      return _.isNumber(+value);
+      return _.isString(value) && !_.isNaN(+value);
     }
 
     var numeric = {
