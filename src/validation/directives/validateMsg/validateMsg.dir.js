@@ -29,7 +29,7 @@
              !_.has(model, 'validation')) {
         i = _.lastIndexOf(bind, '.', i) - 1;
         path = bind.substring(0, i + 1);
-        model = _.extract(scope, path);
+        model = _.result(scope, path);
       }
 
       // No validation
