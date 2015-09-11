@@ -6,3 +6,4 @@ bower_components/
 
 # Other
 .tmp/
+typings/
