@@ -41,6 +41,12 @@ angular
       // API endpoint (required)
       url: 'users/:*userId',
       
+      // Schema
+      schema: {
+        firstName: {},
+        lastName: {}
+      },
+      
       // Relationships
       relations: {
         address: 'Address'
@@ -66,14 +72,13 @@ Each data model **must include a `url` field** that defines the resource API end
 
 The `:*field` pattern defines a segment of the url that should be replaced by the appropriate field value on the model.
 
-#### Relationships/Nested Data Models
+### Schema
+
+The `schema` field defines what fields get sent on saves. Keys are field names and values are arbitrary.
+
+#### Relationships
 
 The `relations` field on models is a special object that denotes nested models. Keys are field names and values are model names. To resolve relationships call `relationalize()` on the data model.
-
-```
-// After calling user.address should now be resolved
-user.relationalize();
-```
 
 #### Helper Functions
 
@@ -85,6 +90,8 @@ The `DataModel` service mixin includes standard restful api functions. Each func
 
 #### get(id)
 
+Gets an existing entity.
+
 ```
 // GET /api/v1/users/5
 user.get(5).then(function (user) { ... });
@@ -92,12 +99,16 @@ user.get(5).then(function (user) { ... });
 
 #### list(params)
 
+Gets a paged list of entities.
+
 ```
 // GET /api/v1/users?page=2&orderBy=createDate
 user.list({ page: 2, orderBy: 'createDate' }).then(function (list) { ... });
 ```
 
 #### save()
+
+Creates/updates an entity.
 
 ```
 // POST api/v1/users
@@ -111,6 +122,8 @@ user.save().then(function (user) { ... });
 ```
 
 #### delete(id)
+
+Deletes an entity.
 
 ```
 // DELETE api/v1/users
