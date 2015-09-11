@@ -21,6 +21,10 @@ function Config(DataModelProvider) {
 }
 ```
 
+#### setBaseUrl(string baseUrl)
+
+Sets the base url for all api calls.
+
 ## Defining a model
 
 Define your model the extend it with the `DataModel` service mixin:
@@ -34,12 +38,12 @@ angular
   
   function UserFactory(DataModel) {
     var model = {
-      // API endpoint
+      // API endpoint (required)
       url: 'users/:*userId',
       
       // Relationships
       relations: {
-        
+        address: 'Address'
       },
     
       // Helper functions
@@ -49,80 +53,79 @@ angular
       ...
     };
     
-    _.assignClone(model, DataModel);
+    // Extend
+    _.assign(model, _.cloneDeep(DataModel));
     
     return model;
   }
 ```
 
-### Url
-**Each model must include a `url` field** that defines the base resource API endpoint.
+#### Url
+
+Each data model **must include a `url` field** that defines the resource API endpoint.
 
 The `:*field` pattern defines a segment of the url that should be replaced by the appropriate field value on the model.
 
-### TODO: Relationships
+#### Relationships/Nested Data Models
 
-### Helper Functions
+The `relations` field on models is a special object that denotes nested models. Keys are field names and values are model names. To resolve relationships call `relationalize()` on the data model.
+
+```
+// After calling user.address should now be resolved
+user.relationalize();
+```
+
+#### Helper Functions
+
 Functions defined on the model will be mixed into every instance of the model. This is useful for functions you want to reuse per model in multiple controllers/services.
 
-## Getting an Instance
+## API Functions
 
-**Always call `create({...})` to get a model instance.** Never use the factory directly as it is a *singleton*.
+The `DataModel` service mixin includes standard restful api functions. Each function returns a promise.
 
-```js
-angular
-  .module('app')
-  .controller('UserCreateCtrl', UserCreateCtrl);
-  
-  UserCreateCtrl.$inject = ['User'];
-  
-  function UserCreateCtrl(User) {
-    var vm = this;
-    
-    vm.user = {};
-    
-    function init() {
-      // Create a new user instance
-      vm.user = User.create();
-    }
-    
-    init();
-  }
-```
-
-## API Methods
-
-DataModels come with standard restful api methods.
-
-### Get
+#### get(id)
 
 ```
-// Get user
+// GET /api/v1/users/5
 user.get(5).then(function (user) { ... });
 ```
 
-### List
+#### list(params)
 
 ```
-// Get a paged list of users
-user.list({ query: 'john', orderBy: 'createDate', page: 2, pageSize: 10 }).then(function (list) { ... });
+// GET /api/v1/users?page=2&orderBy=createDate
+user.list({ page: 2, orderBy: 'createDate' }).then(function (list) { ... });
 ```
 
-### Save
+#### save()
+
+Performs a POST. Returns a promise.
 
 ```
-// Save a new user
+// POST api/v1/users
 var user = User.create({ firstName: 'John' });
 user.save();
 
-// Update an existing user
+// POST api/v1/users/5
 user.get(5);
-...
+user.name = 'John';
 user.save();
 ```
 
-### Delete
+#### delete(id)
+
 ```
-// Delete user
+// DELETE api/v1/users
 user.remove(5);
 ```
+
+## Getting Instances
+
+It is very common that you won't want the same instance of your data model everywhere. Use the `Instantiable` service mixin in conjunction with the `DataModel` mixin to get new instances.
+
+```js
+// Extend
+_.assign(model, _.cloneDeep(Instantiable), _.cloneDeep(DataModel));
+```
+
+See the [Instantiable Docs](src/instantiable/instantiable.md) for indepth explanations and examples.
