@@ -99,29 +99,27 @@ user.list({ page: 2, orderBy: 'createDate' }).then(function (list) { ... });
 
 #### save()
 
-Performs a POST. Returns a promise.
-
 ```
 // POST api/v1/users
 var user = User.create({ firstName: 'John' });
-user.save();
+user.save().then(function (user) { ... });
 
 // POST api/v1/users/5
 user.get(5);
 user.name = 'John';
-user.save();
+user.save().then(function (user) { ... });
 ```
 
 #### delete(id)
 
 ```
 // DELETE api/v1/users
-user.remove(5);
+user.remove(5).then(function (data) { ... });
 ```
 
 ## Getting Instances
 
-It is very common that you won't want the same instance of your data model everywhere. Use the `Instantiable` service mixin in conjunction with the `DataModel` mixin to get new instances.
+It is very common that you won't want the same instance of your data model everywhere. Use the `Instantiable` service mixin in conjunction with the `DataModel` service mixin to get new instances.
 
 ```js
 // Extend
