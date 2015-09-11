@@ -29,4 +29,4 @@ See each section for indepth explanations and examples:
 
 ## Contributing
 
-Please read through the [contributing guidelines](contributing.md). Included are directions for opening issues, coding standards, and notes on development.
+Please read through the [Javascript Style Guide](https://github.com/rentler/javascript-styleguide) and [Angular Style Guide](https://github.com/rentler/angular-styleguide).

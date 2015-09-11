@@ -114,6 +114,59 @@ var model = {
 };
 ```
 
+## Built-In Validators
+
+### alphanumeric 
+
+type: Boolean
+
+Validates if field contains only letters and numbers.
+
+```js
+alphanumeric: true
+// or
+alphanumeric: {
+  alphanumeric: true,
+  message: 'My Message'
+}
+```
+
+### compare: fieldName
+
+Validates if field is equal to another field.
+
+### email true|false
+
+Validates if field is an email.
+
+### equals object|string|number|boolean
+
+Validates if field equals value.
+
+### length [min,max]
+
+Validates if field length is in range.
+
+### mandatory true|false
+
+Validates if field is true.
+
+### numeric true|false
+
+Validates if field is a number.
+
+### pattern regex
+
+Validates if field follows regex pattern.
+
+### range [min, max]
+
+Validates if field is in range.
+
+### required true|false
+
+Validates if field has value.
+
 ## Custom Validators
 
 When creating a custom validator the *service name* must be capitalized and end with 'Validator'.
