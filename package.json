@@ -1,6 +1,6 @@
 {
   "name": "angular-rentler",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Data and validation tools for developing with angularjs",
   "main": "dist/angular-rentler.min.js",
   "scripts": {
