@@ -69,13 +69,13 @@ model.validation.errors.age // => []
 
 ```
 // Reset all validation
-model.validation.reset();
+model.resetValidation();
 
 // Reset validation for a single field
-model.validation.reset('userId');
+model.resetValidation('userId');
 
 // Reset validation for multiple fields
-model.validation.reset(['userId', 'age']);
+model.resetValidation(['userId', 'age']);
 ```
 
 ## Custom Error Messages

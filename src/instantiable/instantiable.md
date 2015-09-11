@@ -1,10 +1,10 @@
 # Instantiable
 
-Services in angular are *singletons*. Sometimes you don't want the same object everytime. The `Instantiable` mixin service allows for copies of an object to be created.
+Angular services are *singletons*. Sometimes you don't want the same object everytime. The `Instantiable` mixin service allows for new instances of an object to be created.
 
 `Instantiable` has a single function `create(options...)` which creates a deep copy of itself with `options` also assigned to itself.
 
-Extend your object with the mixin:
+Extend your service with the mixin:
 
 ```js
 angular
@@ -25,7 +25,8 @@ angular
   }
 ```
 
-Usage:
+Now you can get new instances of your service:
+
 ```js
 angular
   .module('app')
