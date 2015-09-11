@@ -34,17 +34,15 @@ angular
   AppCtrl.$inject = ['AppService'];
   
   function AppCtrl(AppService) {
-	var vm = this;
-	
-	vm.service = {};
-	
-	function init() {
-	  vm.service = AppService.create({ hello: 'world' });
-	  
-	  // Service now looks like this:
-	  // { name: 'Hi', hello: 'world', create: function (...) }
-	}
-	
-	init();
+    var vm = this;
+    
+    vm.service = {};
+    
+    function init() {
+      // Service now has a create({...}) function
+      vm.service = AppService.create({ hello: 'world' });
+    }
+    
+    init();
   }
 ```
