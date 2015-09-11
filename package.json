@@ -1,7 +1,26 @@
 {
   "name": "angular-rentler",
   "version": "1.0.0",
-  "description": "Angular components for Rentler applications",
+  "description": "Data and validation tools for developing with angularjs",
+  "main": "dist/angular-rentler.min.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rentler/angular-rentler"
+  },
+  "keywords": [
+    "angular",
+    "validation",
+    "data"
+  ],
+  "author": "Rentler (http://www.rentler.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rentler/angular-rentler/issues"
+  },
+  "homepage": "http://github.com/rentler/angular-rentler",
   "devDependencies": {
     "bower": "^1.5.2",
     "del": "^2.0.1",

@@ -1,6 +1,11 @@
 {
   "name": "angular-rentler",
+  "description": "Data and validation tools for developing with angularjs",
   "version": "1.0.0",
+  "homepage": "https://github.com/rentler/angular-rentler",
+  "main": [
+    "dist/angular-rentler.js"
+  ],
   "ignore": [
     "**/.*",
     "node_modules",
@@ -14,5 +19,19 @@
   },
   "devDependencies": {
     "angular-mocks": "~1.2"
-  }
+  },
+  "keywords": [
+    "rentler",
+    "angular",
+    "validation",
+    "data"
+  ],
+  "authors": [
+    { "name": "Rentler", "homepage": "http://www.rentler.com" }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com/rentler/angular-rentler.git"
+  },
+  "license": "MIT"
 }
