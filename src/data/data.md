@@ -1,4 +1,4 @@
-# Data Modeling
+# Data
 
 Models are RESTful business objects.
 
@@ -6,7 +6,7 @@ Models are RESTful business objects.
 
 Use the `DataModelProvider` at configuration phase:
 
-```
+```js
 angular
   .module('app', [])
   .config(Config);
@@ -25,7 +25,7 @@ function Config(DataModelProvider) {
 
 Define your model the extend it with the `DataModel` service mixin:
 
-```
+```js
 angular
   .module('app')
   .factory('User', UserFactory);
@@ -65,14 +65,11 @@ The `:*field` pattern defines a segment of the url that should be replaced by th
 ### Helper Functions
 Functions defined on the model will be mixed into every instance of the model. This is useful for functions you want to reuse per model in multiple controllers/services.
 
-
-
-
 ## Getting an Instance
 
 **Always call `create({...})` to get a model instance.** Never use the factory directly as it is a *singleton*.
 
-```
+```js
 angular
   .module('app')
   .controller('UserCreateCtrl', UserCreateCtrl);
