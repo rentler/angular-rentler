@@ -1,6 +1,8 @@
 # angular-rentler
 Tools to help streamline angular applications. Includes data services and validation.
 
+![Build Status](https://travis-ci.org/rentler/angular-rentler.svg)
+
 ## Installation
 
 ```
