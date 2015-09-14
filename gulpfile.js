@@ -18,7 +18,7 @@ var config = {
   dest: 'dist/',
   templates: 'src/**/*.html',
   fileName: 'angular-rentler.js',
-  moduleName: 'rentler'
+  moduleName: 'rentler.core'
 };
 
 gulp.task('default', ['build']);

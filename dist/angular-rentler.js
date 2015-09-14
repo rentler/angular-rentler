@@ -1,4 +1,3 @@
-angular.module("rentler").run(["$templateCache", function($templateCache) {$templateCache.put("validation/directives/validateMsg/validateMsg.html","<div class=\"text-danger\" ng-if=\"messages.length > 0\">\n    <div ng-repeat=\"message in messages | limitTo:1\">{{message}}</div>\n</div>");}]);
 (function () {
   'use strict';
   
@@ -6,6 +5,7 @@ angular.module("rentler").run(["$templateCache", function($templateCache) {$temp
   	.module('rentler.core', []);
 	  
 }());
+angular.module("rentler.core").run(["$templateCache", function($templateCache) {$templateCache.put("validation/directives/validateMsg/validateMsg.html","<div class=\"text-danger\" ng-if=\"messages.length > 0\">\n    <div ng-repeat=\"message in messages | limitTo:1\">{{message}}</div>\n</div>");}]);
 (function () {
   'use strict';
 
@@ -188,36 +188,6 @@ angular.module("rentler").run(["$templateCache", function($templateCache) {$temp
     }
   }
 
-}());
-(function () {
-  'use strict';
-  
-  angular
-  	.module('rentler.core')
-	.factory('Instantiable', InstantiableFactory);
-	
-  InstantiableFactory.$inject = [];
-  
-  function InstantiableFactory() {
-	var mixin = {
-	  create: create
-	};
-	
-	return mixin;
-	
-	function create(opts) {
-	  var _this = this;
-	  
-	  var instance = _.cloneDeep(_this);
-	  
-	  _.assign(instance, opts);
-	  
-	  _.bindAll(instance);
-	  
-	  return instance;
-	}
-  }
-  
 }());
 (function () {
   'use strict';
@@ -625,6 +595,36 @@ angular.module("rentler").run(["$templateCache", function($templateCache) {$temp
   }
 
 })();
+(function () {
+  'use strict';
+  
+  angular
+  	.module('rentler.core')
+	.factory('Instantiable', InstantiableFactory);
+	
+  InstantiableFactory.$inject = [];
+  
+  function InstantiableFactory() {
+	var mixin = {
+	  create: create
+	};
+	
+	return mixin;
+	
+	function create(opts) {
+	  var _this = this;
+	  
+	  var instance = _.cloneDeep(_this);
+	  
+	  _.assign(instance, opts);
+	  
+	  _.bindAll(instance);
+	  
+	  return instance;
+	}
+  }
+  
+}());
 (function () {
   'use strict';
 
