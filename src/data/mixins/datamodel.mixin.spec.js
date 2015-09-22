@@ -29,6 +29,11 @@
           fullName: function () {
             var _this = this;
             return _this.firstName + ' ' + _this.lastName;
+          },
+          confirm: function (token) {
+            var _this = this;
+            
+            return _this.http({ name: 'confirm', method: 'POST', url: '/confirm', data: { token: token }});
           }
         };
         
@@ -136,6 +141,15 @@
       user.relationalize();
       expect(user.address.url).toBeDefined();
       expect(user.address.simple).toBeDefined();
+    });
+    
+    it('should be able to mixin custom http helpers', function () {
+      $httpBackend.expectPOST('/api/v1/accounts/10/users/confirm').respond(200, { confirmed: true });
+      
+      var user = User.create({ accountId: 10 });
+      user.confirm('a_token');
+      
+      $httpBackend.flush();
     });
   });
   
