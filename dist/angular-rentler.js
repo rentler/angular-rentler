@@ -652,6 +652,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
         list: list,
         save: save,
         remove: remove,
+        http: http,
         relationalize: relationalize,
         progress: { }
       };
@@ -760,6 +761,21 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
           _this.progress.remove = false;
         });
 
+        return promise;
+      }
+      
+      function http(opts) {
+        var _this = this;
+        
+        _this.progress[opts.name] = true;
+        
+        opts.url = buildUrl(_this.url + opts.url, null, _this);
+        
+        var promise = $http(opts)
+        .finally(function () {
+          _this.progress[opts.name] = false;
+        });
+        
         return promise;
       }
 
