@@ -375,7 +375,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 
   function LengthValidator() {
     function validate(value, instance, opts) {
-      if (!opts)
+      if (!opts || !value)
         return true;
 
       var minmax = _.isArray(opts) ? opts : opts.length,
