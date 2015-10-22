@@ -69,11 +69,11 @@ describe('Validatable', function () {
     expect(user.validation.errors.userId).toBeUndefined();
   });
 
-  it('should add to validation rather than replacing previous validation', function () {
+  it('should add reset validation errors on each validation call', function () {
     user.validate(['firstName']);
     user.validate(['lastName']);
 
-    expect(user.validation.errors.firstName).not.toBeUndefined();
+    expect(user.validation.errors.firstName).toBeUndefined();
     expect(user.validation.errors.lastName).not.toBeUndefined();
     expect(user.validation.isValid).toBe(false);
   });

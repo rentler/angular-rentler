@@ -23,7 +23,7 @@
       
       // Initialize validation
       _this.validation = _this.validation || {};
-      _this.validation.errors = _this.validation.errors || {};
+      _this.validation.errors = {};
 
       _.forIn(_this.schema, function (validators, field) {
         // If field(s) are provided skip those that aren't included
