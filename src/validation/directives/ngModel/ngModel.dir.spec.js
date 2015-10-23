@@ -35,6 +35,8 @@
 	  $compile(element)($rootScope);
 	  
 	  ngModelCtrl = element.controller('ngModel');
+    
+    $scope.$digest();
 	}));
 	
 	it('should call validate on digest', function () {

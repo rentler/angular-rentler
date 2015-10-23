@@ -15,8 +15,8 @@
 	  formCtrl = element.controller('form');
 	}));
 	
-	it('should not set $submitted initially', function () {
-	  expect(formCtrl.$submitted).toBeUndefined();
+	it('should set $submitted to false', function () {
+	  expect(formCtrl.$submitted).toBe(false);
 	});
 	
 	it('should add and set $submitted field to FormController on submit', function () {
