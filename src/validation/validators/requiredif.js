@@ -18,7 +18,7 @@
 	}
 	
 	var requiredif = {
-	  message: 'Field is required.',
+	  message: 'Required',
 	  validate: validate
 	};
 	

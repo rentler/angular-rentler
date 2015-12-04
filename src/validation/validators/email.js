@@ -17,7 +17,7 @@
     }
 
     var required = {
-      message: 'Invalid email address.',
+      message: 'Invalid Email',
       validate: validate
     };
 

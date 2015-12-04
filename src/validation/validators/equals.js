@@ -9,7 +9,7 @@
     var equals = {
       validate: validate,
       message: function (field, opts) {
-        return _.format('{0} must be equal to {1}',
+        return _.format('{0} Must Match {1}',
           _.capitalize(field),
           opts);
       }

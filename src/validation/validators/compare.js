@@ -18,7 +18,7 @@
     }
 
     function message(field, opts) {
-      return _.format('Field and {0} must be the same', opts);
+      return _.format('Must Match', opts);
     }
 
     var compare = {

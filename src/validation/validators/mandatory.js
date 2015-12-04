@@ -16,7 +16,7 @@
     }
 
     var mandatory = {
-      message: 'Field is mandatory.',
+      message: 'Must Agree to Continue',
       validate: validate
     };
 

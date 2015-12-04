@@ -24,7 +24,7 @@
 
     var range = {
       validate: validate,
-      message: 'Field is out of range'
+      message: 'Invalid'
     };
 
     return range;

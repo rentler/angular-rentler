@@ -22,10 +22,14 @@
     var length = {
       validate: validate,
       message: function (field, opts) {
-        return _.format('{0} must be between {1} and {2} characters long.',
-          _.capitalize(field),
-          opts[0],
-          opts[1]);
+        if (_.isNumber(opts[0]) && !_.isNumber(opts[1]))
+          return _.format('Must Be At Least {0} Characters Long', opts[0]);
+        else if (!_.isNumber(opts[0]) && _.isNumber(opts[1]))
+          return _.format('Must Be Under {0} Characters Long', opts[1]);
+        else
+          return _.format('Must Be {0}–{1} Characters Long',
+            opts[0],
+            opts[1]);
       }
     };
 
