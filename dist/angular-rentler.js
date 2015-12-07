@@ -163,6 +163,34 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 }());
 (function () {
   'use strict';
+
+  angular
+  	.module('rentler.core')
+	  .directive('form', FormDirective);
+
+  FormDirective.$inject = [];
+
+  function FormDirective() {
+    var directive = {
+      restrict: 'E',
+      require: '^form',
+      link: {
+        pre: pre
+      }
+    };
+
+    return directive;
+
+    function pre(scope, element, attrs, ctrl) {
+      element.on('submit', function () {
+        ctrl.$submitted = true;
+      });
+    }
+  }
+
+}());
+(function () {
+  'use strict';
   
   angular
   	.module('rentler.core')
@@ -225,34 +253,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
   
 })();
-(function () {
-  'use strict';
-
-  angular
-  	.module('rentler.core')
-	  .directive('form', FormDirective);
-
-  FormDirective.$inject = [];
-
-  function FormDirective() {
-    var directive = {
-      restrict: 'E',
-      require: '^form',
-      link: {
-        pre: pre
-      }
-    };
-
-    return directive;
-
-    function pre(scope, element, attrs, ctrl) {
-      element.on('submit', function () {
-        ctrl.$submitted = true;
-      });
-    }
-  }
-
-}());
 (function () {
   'use strict';
   
@@ -385,7 +385,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       if (!opts)
         return true;
         
-      if (_.isNumber(value))
+      if (_.isNumber(value) || _.isUndefined(value) || _.isNull(value))
         return true;
 
       return _.isString(value) && !_.isNaN(+value);

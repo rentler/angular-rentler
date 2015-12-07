@@ -12,7 +12,7 @@
       if (!opts)
         return true;
         
-      if (_.isNumber(value))
+      if (_.isNumber(value) || _.isUndefined(value) || _.isNull(value))
         return true;
 
       return _.isString(value) && !_.isNaN(+value);

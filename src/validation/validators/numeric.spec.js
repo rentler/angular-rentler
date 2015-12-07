@@ -24,12 +24,12 @@
      expect(NumericValidator.validate([], {}, true)).toBe(false);
     });
 
-    it('should validate to false when given null', function () {
-     expect(NumericValidator.validate(null, {}, true)).toBe(false);
+    it('should validate to true when given null', function () {
+     expect(NumericValidator.validate(null, {}, true)).toBe(true);
     });
 
-    it('should validate to false when given undefined', function () {
-     expect(NumericValidator.validate(undefined, {}, true)).toBe(false);
+    it('should validate to true when given undefined', function () {
+     expect(NumericValidator.validate(undefined, {}, true)).toBe(true);
     });
 
     it('should validate to true when options are false', function () {
