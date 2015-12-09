@@ -163,34 +163,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 }());
 (function () {
   'use strict';
-
-  angular
-  	.module('rentler.core')
-	  .directive('form', FormDirective);
-
-  FormDirective.$inject = [];
-
-  function FormDirective() {
-    var directive = {
-      restrict: 'E',
-      require: '^form',
-      link: {
-        pre: pre
-      }
-    };
-
-    return directive;
-
-    function pre(scope, element, attrs, ctrl) {
-      element.on('submit', function () {
-        ctrl.$submitted = true;
-      });
-    }
-  }
-
-}());
-(function () {
-  'use strict';
   
   angular
   	.module('rentler.core')
@@ -253,6 +225,34 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
   
 })();
+(function () {
+  'use strict';
+
+  angular
+  	.module('rentler.core')
+	  .directive('form', FormDirective);
+
+  FormDirective.$inject = [];
+
+  function FormDirective() {
+    var directive = {
+      restrict: 'E',
+      require: '^form',
+      link: {
+        pre: pre
+      }
+    };
+
+    return directive;
+
+    function pre(scope, element, attrs, ctrl) {
+      element.on('submit', function () {
+        ctrl.$submitted = true;
+      });
+    }
+  }
+
+}());
 (function () {
   'use strict';
   
@@ -647,7 +647,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       
       // Initialize validation
       _this.validation = _this.validation || {};
-      _this.validation.errors = {};
+      _this.validation.errors = _this.validation.errors || {};
 
       _.forIn(_this.schema, function (validators, field) {
         // If field(s) are provided skip those that aren't included
