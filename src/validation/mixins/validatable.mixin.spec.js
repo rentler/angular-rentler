@@ -29,6 +29,16 @@ describe('Validatable', function () {
         lastName: {
           required: true,
           alphanumeric: true
+        },
+        hasAge: {
+          
+        },
+        age: {
+          validate: function (instance) {
+            return instance.hasAge;
+          },
+          required: true,
+          range: [21, null]
         }
       }
     };
@@ -85,5 +95,13 @@ describe('Validatable', function () {
 
     expect(user.validation.errors.userId).toContain('Custom error');
     expect(user.validation.errors.firstName).toContain('Custom function error');
+  });
+  
+  it('should skip validation for fields that have a validate function that results in false', function () {
+    user.hasAge = false;
+    user.age = 'poo';
+    user.validate();
+    
+    expect(user.validation.errors.age).toBeUndefined();
   });
 });

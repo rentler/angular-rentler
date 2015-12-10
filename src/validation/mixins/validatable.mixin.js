@@ -30,11 +30,21 @@
         if (fields && (_.isString(fields) && fields !== field) ||
                       (_.isArray(fields) && !_.includes(fields, field)))
           return;
+          
+        // Skip if validate field results in falsey
+        if (_.has(validators, 'validate') && 
+            _.isFunction(validators.validate) && 
+            !validators.validate(_this))
+          return;
 
         // Reset validation for field
         _this.validation.errors[field] = [];
 
         _.forIn(validators, function (validatorOpts, validatorName) {
+          // Skip validate field as it is special
+          if (validatorName.toLowerCase() === 'validate')
+            return;
+          
           // Get the validator and validate
           var factoryValidatorName = _.capitalize(validatorName + 'Validator'),
               validator = $injector.get(factoryValidatorName),
