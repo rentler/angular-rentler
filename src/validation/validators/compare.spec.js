@@ -22,6 +22,14 @@
     it('should validate to true when options are false', function () {
       expect(CompareValidator.validate(null, {}, false)).toBe(true);
     });
+    
+    it('should validate to true when given undefined', function () {
+      expect(CompareValidator.validate(undefined, {}, true)).toBe(true);
+    });
+    
+    it('should validate to true when given null', function () {
+      expect(CompareValidator.validate(null, {}, true)).toBe(true);
+    });
   });
 
 }());

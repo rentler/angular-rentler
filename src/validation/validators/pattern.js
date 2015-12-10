@@ -11,6 +11,9 @@
     function validate(value, instance, opts) {
       if (!opts)
         return true;
+        
+      if (_.isUndefined(value) || _.isNull(value))
+        return true;
 
       var regexp = _.isRegExp(opts) ? opts : opts.pattern;
 

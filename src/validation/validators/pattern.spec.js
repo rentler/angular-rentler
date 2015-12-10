@@ -21,12 +21,12 @@
       expect(PatternValidator.validate([], {}, /^hello|world$/)).toBe(false);
     });
 
-    it('should validate to false when given null', function () {
-      expect(PatternValidator.validate(null, {}, /^hello|world$/)).toBe(false);
+    it('should validate to true when given null', function () {
+      expect(PatternValidator.validate(null, {}, /^hello|world$/)).toBe(true);
     });
 
-    it('should validate to false when given undefined', function () {
-      expect(PatternValidator.validate(undefined, {}, /^hello|world$/)).toBe(false);
+    it('should validate to true when given undefined', function () {
+      expect(PatternValidator.validate(undefined, {}, /^hello|world$/)).toBe(true);
     });
 
     it('should validate to true when options are false', function () {

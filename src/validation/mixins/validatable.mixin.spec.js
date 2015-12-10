@@ -79,6 +79,7 @@ describe('Validatable', function () {
   });
 
   it('should use custom error messages', function () {
+    user.firstName = 5;
     user.userId = null;
     user.validate();
 

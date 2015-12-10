@@ -49,6 +49,14 @@
     it('should validate to true when objects equal', function () {
       expect(EqualsValidator.validate({ name: 'The Amity Affliction' }, {}, { name: 'The Amity Affliction' })).toBe(true);
     });
+    
+    it('should valdiate to true when given undefined', function () {
+      expect(EqualsValidator.validate(undefined, {}, true)).toBe(true);
+    });
+    
+    it('should validate to true when given null', function () {
+      expect(EqualsValidator.validate(null, {}, true)).toBe(true);
+    });
   });
 
 }());

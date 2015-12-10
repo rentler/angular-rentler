@@ -16,6 +16,9 @@
     };
 
     function validate(value, instance, opts) {
+      if (_.isUndefined(value) || _.isNull(value))
+        return true;
+      
       var otherValue = _.has(opts, 'equals') ? opts.equals : opts;
 
       return _.isEqual(value, otherValue);
