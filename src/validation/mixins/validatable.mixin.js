@@ -46,7 +46,7 @@
             return;
           
           // Get the validator and validate
-          var factoryValidatorName = _.capitalize(validatorName + 'Validator'),
+          var factoryValidatorName = _.capitalize(validatorName) + 'Validator',
               validator = $injector.get(factoryValidatorName),
               isValid = validator.validate(_this[field], _this, validatorOpts);
           
