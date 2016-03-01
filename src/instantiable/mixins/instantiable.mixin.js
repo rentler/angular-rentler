@@ -21,8 +21,8 @@
 	  
 	  _.assign(instance, opts);
 	  
-	  _.bindAll(instance);
-	  
+	  _.bindAll(instance, _.functions(instance));
+    
 	  return instance;
 	}
   }

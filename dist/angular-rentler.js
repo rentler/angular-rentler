@@ -742,8 +742,8 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 	  
 	  _.assign(instance, opts);
 	  
-	  _.bindAll(instance);
-	  
+	  _.bindAll(instance, _.functions(instance));
+    
 	  return instance;
 	}
   }
