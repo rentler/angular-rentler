@@ -16,7 +16,7 @@
           min = minmax[0] || (value ? value.length : 0),
           max = minmax[1] || (value ? value.length : 0);
 
-      return _.isString(value) && value.length >= min && value.length <= max;
+      return (_.isString(value) || _.isArray(value)) && value.length >= min && value.length <= max;
     }
 
     var length = {

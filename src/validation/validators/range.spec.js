@@ -23,6 +23,11 @@
     it('should allow for text entries like from textboxes', function () {
       expect(RangeValidator.validate('7', {}, [1, 10])).toBe(true);
     });
+    
+    it('should allow for array values', function () {
+      expect(RangeValidator.validate([1, 2, 3], {}, [1, 5])).toBe(true);
+      expect(RangeValidator.validate([], {}, [1, null])).toBe(false);
+    });
 
     it('should allow for only min or only max options', function () {
       expect(RangeValidator.validate(7, {}, [1, null])).toBe(true);
@@ -31,10 +36,9 @@
       expect(RangeValidator.validate(7, {}, [null, 2])).toBe(false);
     });
 
-    it('should validate to false when given anything but a number', function () {
+    it('should validate to false when given anything but a number or an array', function () {
       expect(RangeValidator.validate('yo', {}, [])).toBe(false);
       expect(RangeValidator.validate(true, {}, [])).toBe(false);
-      expect(RangeValidator.validate([], {}, [])).toBe(false);
     });
 
     it('should validate to true when given null', function () {

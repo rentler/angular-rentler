@@ -19,8 +19,11 @@
           min = minmax[0] || value,
           max = minmax[1] || value;
 
-      if (_.isBoolean(value) || _.isArray(value))
+      if (_.isBoolean(value))
         return false;
+        
+      if (_.isArray(value))
+        return value.length >= min && value.length <= max;
 
       return _.isNumber(+value) && +value >= min && +value <= max;
     }

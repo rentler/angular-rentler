@@ -26,11 +26,15 @@
       expect(LengthValidator.validate('rentler', {}, [null, 7])).toBe(true);
       expect(LengthValidator.validate('rentler', {}, [null, 2])).toBe(false);
     });
+    
+    it('should allow for array values', function () {
+      expect(LengthValidator.validate([1 ,2, 3], {}, [3, null])).toBe(true);
+      expect(LengthValidator.validate([], {}, [1, null])).toBe(false);
+    });
 
-    it('should validate to false when given anything but a string', function () {
+    it('should validate to false when given anything but a string or array', function () {
       expect(LengthValidator.validate(1, {}, [])).toBe(false);
       expect(LengthValidator.validate(true, {}, [])).toBe(false);
-      expect(LengthValidator.validate([], {}, [])).toBe(false);
     });
 
     it('should validate to true when given null', function () {
