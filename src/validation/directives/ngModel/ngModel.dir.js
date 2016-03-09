@@ -31,12 +31,16 @@
       if (!_.has(model, 'validate')) return;
 
       scope.$watch(attrs.ngModel, function () {
+        // Validate
+        model.validate();
+        
         // Find field name
         var fieldName = _.last(attrs.ngModel.split('.'));
-
-        // Validate
-        var isValid = model.validate(fieldName);
-
+        
+        // Get the number of errors for the field
+        var length = model.validation.errors[fieldName].length;
+        var isValid = length === 0;
+        
         // Set validity
         ctrl.$setValidity('', isValid);
       });
