@@ -329,8 +329,11 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
           min = minmax[0] || value,
           max = minmax[1] || value;
 
-      if (_.isBoolean(value) || _.isArray(value))
+      if (_.isBoolean(value))
         return false;
+        
+      if (_.isArray(value))
+        return value.length >= min && value.length <= max;
 
       return _.isNumber(+value) && +value >= min && +value <= max;
     }
@@ -452,7 +455,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
           min = minmax[0] || (value ? value.length : 0),
           max = minmax[1] || (value ? value.length : 0);
 
-      return _.isString(value) && value.length >= min && value.length <= max;
+      return (_.isString(value) || _.isArray(value)) && value.length >= min && value.length <= max;
     }
 
     var length = {
@@ -688,7 +691,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
             return;
           
           // Get the validator and validate
-          var factoryValidatorName = _.capitalize(validatorName) + 'Validator',
+          var factoryValidatorName = _.upperFirst(validatorName) + 'Validator',
               validator = $injector.get(factoryValidatorName),
               isValid = validator.validate(_this[field], _this, validatorOpts);
           
