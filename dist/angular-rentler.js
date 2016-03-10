@@ -73,7 +73,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       var fieldName = _.last(bind.split('.'));
       
       // Build path to field error
-      var path = rValidatorCtrl.attr + '.errors';
+      var path = rValidatorCtrl.attr;
       
       // Get validator
       var validator = rValidatorCtrl.validator;
@@ -119,7 +119,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       var fieldName = _.last(bind.split('.'));
       
       // Build path to errors
-      var path = rValidatorCtrl.attr + '.errors';
+      var path = rValidatorCtrl.attr;
       
       // Get validator
       var validator = rValidatorCtrl.validator;
@@ -181,6 +181,34 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
         
         // Set validity
         ngModelCtrl.$setValidity('', isValid);
+      });
+    }
+  }
+
+}());
+(function () {
+  'use strict';
+
+  angular
+  	.module('rentler.core')
+	  .directive('form', FormDirective);
+
+  FormDirective.$inject = [];
+
+  function FormDirective() {
+    var directive = {
+      restrict: 'E',
+      require: '^form',
+      link: {
+        pre: pre
+      }
+    };
+
+    return directive;
+
+    function pre(scope, element, attrs, ctrl) {
+      element.on('submit', function () {
+        ctrl.$submitted = true;
       });
     }
   }
@@ -250,34 +278,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
   
 })();
-(function () {
-  'use strict';
-
-  angular
-  	.module('rentler.core')
-	  .directive('form', FormDirective);
-
-  FormDirective.$inject = [];
-
-  function FormDirective() {
-    var directive = {
-      restrict: 'E',
-      require: '^form',
-      link: {
-        pre: pre
-      }
-    };
-
-    return directive;
-
-    function pre(scope, element, attrs, ctrl) {
-      element.on('submit', function () {
-        ctrl.$submitted = true;
-      });
-    }
-  }
-
-}());
 (function () {
   'use strict';
   
