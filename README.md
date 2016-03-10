@@ -27,7 +27,7 @@ The primary function of the library is better validation. The base angular valid
 
 ```js
 angular
-  .model('app')
+  .module('app')
   .factory('UserSchema', SchemaFactory);
   
 SchemaFactory.$inject = [];
@@ -47,7 +47,7 @@ Any model that is being bound in a controller can now be quickly configured for 
 
 ```js
 angular
-  .model('app')
+  .module('app')
   .factory('MyCtrl', MyCtrl);
   
 MyCtrl.$inject = ['UserSchema', 'Validator'];
