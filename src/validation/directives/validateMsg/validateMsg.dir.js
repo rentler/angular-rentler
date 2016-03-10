@@ -31,7 +31,7 @@
       var fieldName = _.last(bind.split('.'));
       
       // Build path to field error
-      var path = rValidatorCtrl.attr + '.errors.' + fieldName;
+      var path = rValidatorCtrl.attr + '.errors';
       
       // Get validator
       var validator = rValidatorCtrl.validator;

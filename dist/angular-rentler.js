@@ -73,7 +73,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       var fieldName = _.last(bind.split('.'));
       
       // Build path to field error
-      var path = rValidatorCtrl.attr + '.errors.' + fieldName;
+      var path = rValidatorCtrl.attr + '.errors';
       
       // Get validator
       var validator = rValidatorCtrl.validator;
@@ -118,8 +118,8 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       // Find field name
       var fieldName = _.last(bind.split('.'));
       
-      // Build path to field error
-      var path = rValidatorCtrl.attr + '.errors.' + fieldName;
+      // Build path to errors
+      var path = rValidatorCtrl.attr + '.errors';
       
       // Get validator
       var validator = rValidatorCtrl.validator;
