@@ -28,21 +28,30 @@
               return 'Custom function error';
             }
           }
+        },
+        friends: {
+          range: [1, null],
+          collection: {
+            firstName: {
+              required: true
+            }
+          }
         }
       };
       
       model = {
         firstName: 'John',
         hasLastName: true,
-        lastName: 'Doe'
+        lastName: 'Doe',
+        friends: []
       };
       
       modelValidator = Validator.create(schema, model);
     });
     
     it('should validate', function () {
-      expect(modelValidator.validate()).toBe(true);
-      expect(modelValidator.isValid).toBe(true);
+      expect(modelValidator.validate()).toBe(false);
+      expect(modelValidator.isValid).toBe(false);
       expect(modelValidator.timestamp).not.toBeUndefined();
     });
     
@@ -87,6 +96,18 @@
       modelValidator.validate();
       
       expect(modelValidator.errors.lastName).toBeUndefined();
+    });
+    
+    it('should be able to validate collections', function () {
+      model.friends = [
+        { firstName: 'John' },
+        { firstName: '' }
+      ];
+      modelValidator.validate();
+
+      expect(modelValidator.errors['friends[0].firstName']).toBeDefined();
+      expect(modelValidator.errors['friends[1].firstName']).toBeDefined();
+      expect(modelValidator.errors['friends[1].firstName'].length).toBe(1);
     });
     
   });
