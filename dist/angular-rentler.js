@@ -8,6 +8,40 @@
 angular.module("rentler.core").run(["$templateCache", function($templateCache) {$templateCache.put("validation/directives/validateMsg/validateMsg.html","<div class=\"help-block\" ng-if=\"messages.length > 0\">\n  <div ng-repeat=\"message in messages | limitTo:1\">{{message}}</div>\n</div>");}]);
 (function () {
   'use strict';
+  
+  angular
+    .module('rentler.core')
+    .directive('rValidator', Directive);
+    
+  Directive.$inject = [];
+  
+  function Directive() {
+    var directive = {
+      restrict: 'EA',
+      scope: {
+        rValidator: '='
+      },
+      controller: Ctrl
+    };
+    return directive;
+  }
+  
+  Ctrl.$inject = ['$scope', '$attrs'];
+  
+  function Ctrl($scope, $attrs) {
+    var vm = this;
+    
+    if (!_.has($scope.rValidator, 'validate') &&
+        !_.isFunction($scope.rValidator.validate))
+      throw 'Invalid Validator.';
+    
+    vm.attr = $attrs.rValidator;
+    vm.validator = $scope.rValidator;
+  }
+    
+})();
+(function () {
+  'use strict';
 
   angular
     .module('rentler.core')
@@ -18,7 +52,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   function ValidateMsgDirective() {
     var directive = {
       restrict: 'A',
-      require: '^form',
+      require: ['^form', '^rValidator'],
       scope: true,
       link: link,
       replace: true,
@@ -27,39 +61,34 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 
     return directive;
 
-    function link(scope, element, attrs, ctrl) {
-      // Get the field binding
+    function link(scope, element, attrs, ctrls) {
+      // Get controllers
+      var formCtrl = ctrls[0],
+          rValidatorCtrl = ctrls[1];
+
+      // Get binding
       var bind = attrs.rValidateMsg;
-
-      // Find validation
-      var i = _.lastIndexOf(bind, '.'), path, model;
-      while (_.lastIndexOf(bind, '.', i) > -1 &&
-             !_.has(model, 'validation')) {
-        i = _.lastIndexOf(bind, '.', i) - 1;
-        path = bind.substring(0, i + 1);
-        model = _.result(scope, path);
-      }
-
-      // No validation
-      if (!_.has(model, 'validation')) return;
-
+      
       // Find field name
       var fieldName = _.last(bind.split('.'));
-
-      // Get path to validation
-      path += '.validation';
+      
+      // Build path to field error
+      var path = rValidatorCtrl.attr + '.errors.' + fieldName;
+      
+      // Get validator
+      var validator = rValidatorCtrl.validator;
 
       scope.$watch(path, function () {
-        // Not sumbitted
-        if (!ctrl.$submitted) return;
-
-        // Set messages
-        scope.messages = _.has(model.validation.errors, fieldName) ? model.validation.errors[fieldName] : [];
+        // Not submitted no validation
+        if (!formCtrl.$submitted) return;
+        
+        // Add approriate classes
+        scope.messages = _.has(validator.errors, fieldName) ? validator.errors[fieldName] : [];
       }, true);
     }
   }
 
-}());
+})();
 (function () {
   'use strict';
 
@@ -72,40 +101,35 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   function ValidateClassDirective(Validation) {
     var directive = {
       restrict: 'A',
-      require: '^form',
+      require: ['^form', '^rValidator'],
       link: link
     };
 
     return directive;
 
-    function link(scope, element, attrs, ctrl) {
+    function link(scope, element, attrs, ctrls) {
+      // Get controllers
+      var formCtrl = ctrls[0],
+          rValidatorCtrl = ctrls[1];
+
       // Get binding
       var bind = attrs.rValidateClass;
       
-      // Find validation
-      var i = _.lastIndexOf(bind, '.'), path, model;
-      while (_.lastIndexOf(bind, '.', i) > -1 &&
-             !_.has(model, 'validation')) {
-        i = _.lastIndexOf(bind, '.', i) - 1;
-        path = bind.substring(0, i + 1);
-        model = _.result(scope, path);
-      }
-      
-      // No validation
-      if (!_.has(model, 'validation')) return;
-      
       // Find field name
       var fieldName = _.last(bind.split('.'));
-
-      // Get path to validation
-      path += '.validation';
+      
+      // Build path to field error
+      var path = rValidatorCtrl.attr + '.errors.' + fieldName;
+      
+      // Get validator
+      var validator = rValidatorCtrl.validator;
 
       scope.$watch(path, function () {
         // Not submitted no validation
-        if (!ctrl.$submitted || !_.has(model.validation.errors, fieldName)) return;
+        if (!formCtrl.$submitted || !_.has(validator.errors, fieldName)) return;
         
         // Get the number of errors for the field
-        var length = model.validation.errors[fieldName].length;
+        var length = validator.errors[fieldName].length;
         
         // Add approriate classes
         if (length === 0) element.removeClass(Validation.getClasses().error).addClass(Validation.getClasses().success);
@@ -127,39 +151,36 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   function ValidateDirective() {
     var directive = {
       restrict: 'A',
-      require: 'ngModel',
+      require: ['ngModel', '?^rValidator'],
       link: link
     };
 
     return directive;
 
-    function link(scope, element, attrs, ctrl) {
-      // Find validatable
-      var i = _.lastIndexOf(attrs.ngModel, '.'), path, model;
-      while (_.lastIndexOf(attrs.ngModel, '.', i) > -1 &&
-             !_.has(model, 'validate') &&
-             !_.isFunction(model, 'validate')) {
-        i = _.lastIndexOf(attrs.ngModel, '.', i) - 1;
-        path = attrs.ngModel.substring(0, i + 1);
-        model = _.result(scope, path);
-      }
-      
-      // Not validatable
-      if (!_.has(model, 'validate')) return;
+    function link(scope, element, attrs, ctrls) {
+      // Get controllers
+      var ngModelCtrl = ctrls[0],
+          rValidatorCtrl = ctrls[1];
 
+      // If there is no validator then return
+      var validator = _.get(rValidatorCtrl, 'validator');
+      
+      if (!validator) return;
+      
+      // Watch for changes on the field
       scope.$watch(attrs.ngModel, function () {
         // Validate
-        model.validate();
+        validator.validate();
         
         // Find field name
         var fieldName = _.last(attrs.ngModel.split('.'));
         
         // Get the number of errors for the field
-        var length = model.validation.errors[fieldName].length;
+        var length = validator.errors[fieldName].length;
         var isValid = length === 0;
         
         // Set validity
-        ctrl.$setValidity('', isValid);
+        ngModelCtrl.$setValidity('', isValid);
       });
     }
   }
@@ -614,6 +635,94 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   
   angular
     .module('rentler.core')
+    .factory('Validator', Factory);
+    
+  Factory.$inject = ['$injector'];
+  
+  function Factory($injector) {
+    var service = {
+      create: create
+    };
+    
+    return service;
+    
+    function create(schema, model) {
+      var validator = {
+        validate: validate,
+        errors: {},
+        isValid: true,
+        timestamp: 0
+      };
+      
+      function validate(fields) {
+        var _this = this;
+        
+        _.forIn(schema, function (validators, field) {
+          // If field(s) are provided skip those that aren't included
+          if (fields && (_.isString(fields) && fields !== field) ||
+                        (_.isArray(fields) && !_.includes(fields, field)))
+            return;
+          
+          // Skip if validate function results in falsey
+          if (_.has(validators, 'validateIf') && 
+              _.isFunction(validators.validateIf) && 
+              !validators.validateIf(model))
+            return;
+            
+          // Reset validation for field
+          _this.errors[field] = [];
+          
+          _.forIn(validators, function (validatorOpts, validatorName) {
+            // Skip validate field as it is special
+            if (validatorName.toLowerCase() === 'validateif')
+              return;
+              
+            // Get the validator and validate
+            var factoryValidatorName = _.upperFirst(validatorName) + 'Validator',
+                validator = $injector.get(factoryValidatorName),
+                isValid = validator.validate(model[field], model, validatorOpts);
+                
+            // Add any errors to the field if invalid
+            if (!isValid) {
+              var message = _.isString(validatorOpts.message) ? validatorOpts.message :
+                            _.isFunction(validatorOpts.message) ? validatorOpts.message(field, validatorOpts) :
+                            _.isString(validator.message) ? validator.message :
+                            _.isFunction(validator.message) ? validator.message(field, validatorOpts) :
+                            'Invalid';
+
+              _this.errors[field].push(message);
+            }
+          });
+        });
+        
+        _this.isValid = _(_this.errors)
+                          .values()
+                          .flatten()
+                          .value()
+                          .length === 0;
+        
+        _this.timestamp = _.now();
+        
+        var isValid = _(_this.errors)
+                        .pick(fields || _.keys(schema))
+                        .values()
+                        .flatten()
+                        .value()
+                        .length === 0;
+
+        return isValid;
+      }
+      
+      return validator;
+    }
+  }
+    
+})();
+(function () {
+  'use strict';
+  
+  angular
+    .module('rentler.core')
   	.provider('Validation', ValidationProvider);
 	  
   ValidationProvider.$inject = [];
@@ -647,85 +756,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
   
 }());
-(function () {
-  'use strict';
-
-  angular
-    .module('rentler.core')
-    .factory('Validatable', Validatable);
-
-  Validatable.$inject = ['$injector'];
-
-  function Validatable($injector) {
-    var mixin = {
-      validation: {},
-      validate: validate
-    };
-    
-    return mixin;
-    
-    function validate(fields) {
-      var _this = this;
-      
-      if (_.isEmpty(_this.schema))
-        return;
-      
-      // Initialize validation
-      _this.validation = _this.validation || {};
-      _this.validation.errors = _this.validation.errors || {};
-
-      _.forIn(_this.schema, function (validators, field) {
-        // If field(s) are provided skip those that aren't included
-        if (fields && (_.isString(fields) && fields !== field) ||
-                      (_.isArray(fields) && !_.includes(fields, field)))
-          return;
-          
-        // Skip if validate field results in falsey
-        if (_.has(validators, 'validate') && 
-            _.isFunction(validators.validate) && 
-            !validators.validate(_this))
-          return;
-
-        // Reset validation for field
-        _this.validation.errors[field] = [];
-
-        _.forIn(validators, function (validatorOpts, validatorName) {
-          // Skip validate field as it is special
-          if (validatorName.toLowerCase() === 'validate')
-            return;
-          
-          // Get the validator and validate
-          var factoryValidatorName = _.upperFirst(validatorName) + 'Validator',
-              validator = $injector.get(factoryValidatorName),
-              isValid = validator.validate(_this[field], _this, validatorOpts);
-          
-          // Add any errors to the field if invalid
-          if (!isValid) {
-            var message = _.isString(validatorOpts.message) ? validatorOpts.message :
-                          _.isFunction(validatorOpts.message) ? validatorOpts.message(field, validatorOpts) :
-                          _.isString(validator.message) ? validator.message :
-                          _.isFunction(validator.message) ? validator.message(field, validatorOpts) :
-                          'Invalid';
-
-            _this.validation.errors[field].push(message);
-          }
-
-        });
-      });
-
-      _this.validation.isValid = _(_this.validation.errors)
-                                    .values()
-                                    .flatten()
-                                    .value()
-                                    .length === 0;
-
-      _this.validation.timestamp = _.now();
-
-      return _this.validation.isValid;
-    }
-  }
-
-})();
 (function () {
   'use strict';
   

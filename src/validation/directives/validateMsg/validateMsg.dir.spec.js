@@ -2,51 +2,59 @@
   'use strict';
   
   describe('r-valdiate-msg', function () {
-	var $templateCache, Validatable, User, $scope, formElement, element;
+	  var $scope, $compile, $templateCache, Validator, schema, model, validator, formElem, elem;
 	
-	beforeEach(module('rentler.core'));
-	
-	beforeEach(inject(function (_$templateCache_, _$httpBackend_, _Validatable_) {
-	  $templateCache = _$templateCache_;
-	  $templateCache.put('validation/directives/validateMsg/validateMsg.html', '<div ng-if="messages.length > 0">error</div>');
-	  Validatable = _Validatable_;
-	}));
+    beforeEach(module('rentler.core'));
+    
+    beforeEach(inject(function (_$rootScope_, _$compile_, _$templateCache_, _Validator_) {
+      $scope = _$rootScope_;
+      $compile = _$compile_;
+      $templateCache = _$templateCache_;
+      Validator = _Validator_;
+    }));
+    
+    beforeEach(function () {
+      $templateCache.put('validation/directives/validateMsg/validateMsg.html', '<div ng-if="messages.length > 0">error</div>');
+    });
+    
+    beforeEach(function () {
+      schema = {
+        firstName: {
+          required: true
+        }
+      };
+      
+      model = {
+        firstName: ''
+      };
+      
+      validator = Validator.create(schema, model);
+    });
 	
 	beforeEach(function () {
-	  User = {
-		schema: {
-		  firstName: {
-		    required: true,
-		  }
-		}
-	  };
-	
-	  _.assign(User, _.cloneDeep(Validatable));
-	});
-	
-	beforeEach(inject(function ($compile, $rootScope) {
-	  $scope = $rootScope;
-	  $scope.user = User;
+    $scope.vm = {};
+	  $scope.vm.model = model;
+    $scope.vm.validator = validator;
 	  
-	  formElement = angular.element('<form><div r-validate-msg="user.firstName"></div></form>');
-	  $compile(formElement)($rootScope);
+	  formElem = angular.element('<form r-validator="vm.validator"><div r-validate-msg="vm.model.firstName"></div></form>');
+	  $compile(formElem)($scope);
 	  
-	  element = angular.element(formElement.children()[0]);
-	}));
-	
-	it('should not show errors until the form is submitted', function () {
-	  $scope.$digest();
-	  element = angular.element(formElement.children()[0]);
-	  expect(element.text()).toBe('');
+	  elem = angular.element(formElem.children()[0]);
 	});
 	
-	it('should show errors when the form is submitted', function () {
-	  $scope.user.validate();
-	  formElement.triggerHandler('submit');
-	  $scope.$digest();
-	  element = angular.element(formElement.children()[0]);
-	  expect(element.text()).toBe('error');
-	});
+    it('should not show errors until the form is submitted', function () {
+      $scope.$digest();
+      elem = angular.element(formElem.children()[0]);
+      expect(elem.text()).toBe('');
+    });
+    
+    it('should show errors when the form is submitted', function () {
+      validator.validate();
+      formElem.triggerHandler('submit');
+      $scope.$digest();
+      elem = angular.element(formElem.children()[0]);
+      expect(elem.text()).toBe('error');
+    });
   });
   
-}());
+})();
