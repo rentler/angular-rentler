@@ -1,7 +1,7 @@
 {
   "name": "angular-rentler",
   "description": "Data and validation tools for developing with angularjs",
-  "version": "0.0.995",
+  "version": "0.0.996",
   "homepage": "https://github.com/rentler/angular-rentler",
   "main": [
     "dist/angular-rentler.js"

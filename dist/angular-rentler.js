@@ -188,34 +188,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 }());
 (function () {
   'use strict';
-
-  angular
-  	.module('rentler.core')
-	  .directive('form', FormDirective);
-
-  FormDirective.$inject = [];
-
-  function FormDirective() {
-    var directive = {
-      restrict: 'E',
-      require: '^form',
-      link: {
-        pre: pre
-      }
-    };
-
-    return directive;
-
-    function pre(scope, element, attrs, ctrl) {
-      element.on('submit', function () {
-        ctrl.$submitted = true;
-      });
-    }
-  }
-
-}());
-(function () {
-  'use strict';
   
   angular
   	.module('rentler.core')
@@ -278,6 +250,34 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
   
 })();
+(function () {
+  'use strict';
+
+  angular
+  	.module('rentler.core')
+	  .directive('form', FormDirective);
+
+  FormDirective.$inject = [];
+
+  function FormDirective() {
+    var directive = {
+      restrict: 'E',
+      require: '^form',
+      link: {
+        pre: pre
+      }
+    };
+
+    return directive;
+
+    function pre(scope, element, attrs, ctrl) {
+      element.on('submit', function () {
+        ctrl.$submitted = true;
+      });
+    }
+  }
+
+}());
 (function () {
   'use strict';
   
@@ -487,13 +487,11 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       validate: validate,
       message: function (field, opts) {
         if (_.isNumber(opts[0]) && !_.isNumber(opts[1]))
-          return _.format('Must Be At Least {0} Characters Long', opts[0]);
+          return 'Must Be At Least ' + opts[0] + ' Characters Long';
         else if (!_.isNumber(opts[0]) && _.isNumber(opts[1]))
-          return _.format('Must Be Under {0} Characters Long', opts[1]);
+          return 'Must Be Under ' + opts[1] + ' Characters Long';
         else
-          return _.format('Must Be {0}–{1} Characters Long',
-            opts[0],
-            opts[1]);
+          return 'Must Be ' + opts[0] + '–' + opts[1] + ' Characters Long';
       }
     };
 
@@ -657,43 +655,121 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       function validate(fields) {
         var _this = this;
         
-        _.forIn(schema, function (validators, field) {
-          // If field(s) are provided skip those that aren't included
-          if (fields && (_.isString(fields) && fields !== field) ||
-                        (_.isArray(fields) && !_.includes(fields, field)))
-            return;
+        _validate(schema);
+        
+        // _.forIn(schema, function (validators, field) {
+        //   // If field(s) are provided skip those that aren't included
+        //   if (fields && (_.isString(fields) && fields !== field) ||
+        //                 (_.isArray(fields) && !_.includes(fields, field)))
+        //     return;
           
-          // Skip if validate function results in falsey
-          if (_.has(validators, 'validateIf') && 
-              _.isFunction(validators.validateIf) && 
-              !validators.validateIf(model))
-            return;
+        //   // Skip if validate function results in falsey
+        //   if (_.has(validators, 'validateIf') && 
+        //       _.isFunction(validators.validateIf) && 
+        //       !validators.validateIf(model))
+        //     return;
             
-          // Reset validation for field
-          _this.errors[field] = [];
+        //   // Reset validation for field
+        //   _this.errors[field] = [];
           
-          _.forIn(validators, function (validatorOpts, validatorName) {
-            // Skip validate field as it is special
-            if (validatorName.toLowerCase() === 'validateif')
+        //   _.forIn(validators, function (validatorOpts, validatorName) {
+        //     // Skip validate field as it is special
+        //     if (validatorName.toLowerCase() === 'validateif')
+        //       return;
+              
+        //     // Collections
+        //     if (validatorName === 'collection') {
+        //       var collectionSchema = validatorOpts;
+              
+        //       _.forIn(collectionSchema, function (collectionValidators, collectionField) {
+        //         _.forIn(model[field], function (item, index) {
+        //           // Call validate like you would normally
+        //           var itemFieldName = field + '[' + index + ']';
+        //           _.bind(_validate, _this, itemFieldName);
+        //           // validate(friends[0])
+        //         });
+        //       });
+              
+        //       return;
+        //     }
+              
+        //     // Get the validator and validate
+        //     var factoryValidatorName = _.upperFirst(validatorName) + 'Validator',
+        //         validator = $injector.get(factoryValidatorName),
+        //         isValid = validator.validate(model[field], model, validatorOpts);
+                
+        //     // Add any errors to the field if invalid
+        //     if (!isValid) {
+        //       var message = _.isString(validatorOpts.message) ? validatorOpts.message :
+        //                     _.isFunction(validatorOpts.message) ? validatorOpts.message(field, validatorOpts) :
+        //                     _.isString(validator.message) ? validator.message :
+        //                     _.isFunction(validator.message) ? validator.message(field, validatorOpts) :
+        //                     'Invalid';
+
+        //       _this.errors[field].push(message);
+        //     }
+        //   });
+        // });
+        
+        function _validate(schema) {
+          _.forIn(schema, function (validators, field) {
+            // If field(s) are provided skip those that aren't included
+            if (fields && (_.isString(fields) && fields !== field) ||
+                          (_.isArray(fields) && !_.includes(fields, field)))
+              return;
+            
+            // Special validateif method can be put on the validator
+            // in order to only validate if that function returns true
+            if (_.has(validators, 'validateIf') && 
+                _.isFunction(validators.validateIf) && 
+                !validators.validateIf(model))
               return;
               
-            // Get the validator and validate
-            var factoryValidatorName = _.upperFirst(validatorName) + 'Validator',
-                validator = $injector.get(factoryValidatorName),
-                isValid = validator.validate(model[field], model, validatorOpts);
+            // Reset validation for field
+            _this.errors[field] = [];
+            
+            _.forIn(validators, function (validatorOpts, validatorName) {
+              
+              // Skip validate field as it is special
+              // see the above comment
+              if (validatorName.toLowerCase() === 'validateif')
+                return;
                 
-            // Add any errors to the field if invalid
-            if (!isValid) {
-              var message = _.isString(validatorOpts.message) ? validatorOpts.message :
-                            _.isFunction(validatorOpts.message) ? validatorOpts.message(field, validatorOpts) :
-                            _.isString(validator.message) ? validator.message :
-                            _.isFunction(validator.message) ? validator.message(field, validatorOpts) :
-                            'Invalid';
+              // Collections are a new addition allowing subschemas
+              if (validatorName === 'collection') {
+                var collectionSchema = validatorOpts;
+                
+                // build a schema out of the item in the collection
+                _.forIn(model[field], function (item, index) {
+                  var itemSchema = _.clone(collectionSchema);
+                  itemSchema = _.mapKeys(itemSchema, function (value, key) {
+                    return field + '[' + index + '].' + key;
+                  });
 
-              _this.errors[field].push(message);
-            }
+                  _validate(itemSchema);
+                });
+                
+                return;
+              }
+                
+              // Get the validator and validate
+              var factoryValidatorName = _.upperFirst(validatorName) + 'Validator',
+                  validator = $injector.get(factoryValidatorName),
+                  isValid = validator.validate(_.result(model, field), model, validatorOpts);
+              
+              // Add any errors to the field if invalid
+              if (!isValid) {
+                var message = _.isString(validatorOpts.message) ? validatorOpts.message :
+                              _.isFunction(validatorOpts.message) ? validatorOpts.message(field, validatorOpts) :
+                              _.isString(validator.message) ? validator.message :
+                              _.isFunction(validator.message) ? validator.message(field, validatorOpts) :
+                              'Invalid';
+
+                _this.errors[field].push(message);
+              }
+            });
           });
-        });
+        }
         
         _this.isValid = _(_this.errors)
                           .values()

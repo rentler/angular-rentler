@@ -109,21 +109,14 @@
               if (validatorName === 'collection') {
                 var collectionSchema = validatorOpts;
                 
-                // iterate all the items in the collection
-                // build a schema out of the item based on
-                // the definition, and then validate it.
-                _.forIn(collectionSchema, function (collectionValidators) {
-                  
-                  // build a schema out of the item in the collection
-                  _.forIn(model[field], function (item, index) {
-                    var itemSchema = _.clone(collectionSchema);
-                    itemSchema = _.mapKeys(itemSchema, function (value, key) {
-                      return key = field + '[' + index + '].' + key;
-                    });
-
-                    _validate(itemSchema);
+                // build a schema out of the item in the collection
+                _.forIn(model[field], function (item, index) {
+                  var itemSchema = _.clone(collectionSchema);
+                  itemSchema = _.mapKeys(itemSchema, function (value, key) {
+                    return field + '[' + index + '].' + key;
                   });
-                  
+
+                  _validate(itemSchema);
                 });
                 
                 return;
