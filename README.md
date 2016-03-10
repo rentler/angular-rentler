@@ -23,7 +23,7 @@ angular
 
 ### Validation
 
-This library allows much cleaner validation within the angular framework designed for cleaner html and easier extensibility. First things first, define a model.
+The primary function of the library is better validation. The base angular validation framework is extended for cleaner html and easier extensibility. First things first, define a schema.
 
 ```js
 angular
