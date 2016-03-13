@@ -71,8 +71,8 @@
       }
       
       // Not in validator schema
-      if (!_.has(validator.schema, fieldName))
-        return;
+      // if (!_.has(validator.schema, fieldName))
+      //   return;
       
       // Watch for changes on the field
       scope.$watch(attrs.ngModel, function () {

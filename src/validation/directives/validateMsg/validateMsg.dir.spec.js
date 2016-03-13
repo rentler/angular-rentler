@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   
-  fdescribe('r-valdiate-msg', function () {
+  describe('r-valdiate-msg', function () {
 	  var $scope, $compile, $templateCache, Validator, schema, model, validator, formElem, elem;
 	
     beforeEach(module('rentler.core'));
