@@ -17,6 +17,7 @@
     function create(schema, model) {
       var validator = {
         validate: validate,
+        schema: schema,
         errors: {},
         isValid: true,
         timestamp: 0
@@ -26,60 +27,6 @@
         var _this = this;
         
         _validate(schema);
-        
-        // _.forIn(schema, function (validators, field) {
-        //   // If field(s) are provided skip those that aren't included
-        //   if (fields && (_.isString(fields) && fields !== field) ||
-        //                 (_.isArray(fields) && !_.includes(fields, field)))
-        //     return;
-          
-        //   // Skip if validate function results in falsey
-        //   if (_.has(validators, 'validateIf') && 
-        //       _.isFunction(validators.validateIf) && 
-        //       !validators.validateIf(model))
-        //     return;
-            
-        //   // Reset validation for field
-        //   _this.errors[field] = [];
-          
-        //   _.forIn(validators, function (validatorOpts, validatorName) {
-        //     // Skip validate field as it is special
-        //     if (validatorName.toLowerCase() === 'validateif')
-        //       return;
-              
-        //     // Collections
-        //     if (validatorName === 'collection') {
-        //       var collectionSchema = validatorOpts;
-              
-        //       _.forIn(collectionSchema, function (collectionValidators, collectionField) {
-        //         _.forIn(model[field], function (item, index) {
-        //           // Call validate like you would normally
-        //           var itemFieldName = field + '[' + index + ']';
-        //           _.bind(_validate, _this, itemFieldName);
-        //           // validate(friends[0])
-        //         });
-        //       });
-              
-        //       return;
-        //     }
-              
-        //     // Get the validator and validate
-        //     var factoryValidatorName = _.upperFirst(validatorName) + 'Validator',
-        //         validator = $injector.get(factoryValidatorName),
-        //         isValid = validator.validate(model[field], model, validatorOpts);
-                
-        //     // Add any errors to the field if invalid
-        //     if (!isValid) {
-        //       var message = _.isString(validatorOpts.message) ? validatorOpts.message :
-        //                     _.isFunction(validatorOpts.message) ? validatorOpts.message(field, validatorOpts) :
-        //                     _.isString(validator.message) ? validator.message :
-        //                     _.isFunction(validator.message) ? validator.message(field, validatorOpts) :
-        //                     'Invalid';
-
-        //       _this.errors[field].push(message);
-        //     }
-        //   });
-        // });
         
         function _validate(schema) {
           _.forIn(schema, function (validators, field) {
@@ -141,14 +88,17 @@
           });
         }
         
+        // Set model validation state
         _this.isValid = _(_this.errors)
                           .values()
                           .flatten()
                           .value()
                           .length === 0;
         
+        // Set timestamp
         _this.timestamp = _.now();
         
+        // Return model validation state for fields
         var isValid = _(_this.errors)
                         .pick(fields || _.keys(schema))
                         .values()

@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   
-  describe('r-valdiate-msg', function () {
+  fdescribe('r-valdiate-msg', function () {
 	  var $scope, $compile, $templateCache, Validator, schema, model, validator, formElem, elem;
 	
     beforeEach(module('rentler.core'));
@@ -21,11 +21,23 @@
       schema = {
         firstName: {
           required: true
+        },
+        friends: {
+          collection: {
+            name: {
+              required: true
+            }
+          }
         }
       };
       
       model = {
-        firstName: ''
+        firstName: '',
+        friends: [
+          { name: 'first' },
+          { name: 'second' },
+          { name: 'thrid' }
+        ]
       };
       
       validator = Validator.create(schema, model);
@@ -37,7 +49,9 @@
     $scope.vm.validator = validator;
 	  
 	  formElem = angular.element('<form r-validator="vm.validator"><div r-validate-msg="vm.model.firstName"></div></form>');
-	  $compile(formElem)($scope);
+	  var repeatElem = angular.element('<div ng-repeat="friend in vm.model.friends"><div r-validate-msg="friend.firstName"></div></div>');
+    formElem.append(repeatElem);
+    $compile(formElem)($scope);
 	  
 	  elem = angular.element(formElem.children()[0]);
 	});

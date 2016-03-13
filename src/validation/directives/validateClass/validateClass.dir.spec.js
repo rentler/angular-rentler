@@ -23,13 +23,25 @@
         },
         middleName: {
           required: false
+        },
+        friends: {
+          collection: {
+            name: {
+              required: true
+            }
+          }
         }
       };
       
       model = {
         firstName: '',
         lastName: '',
-        middleName: ''
+        middleName: '',
+        friends: [
+          { name: 'first' },
+          { name: 'second' },
+          { name: 'thrid' }
+        ]
       };
       
       validator = Validator.create(schema, model);
@@ -41,7 +53,9 @@
       $scope.vm.model = model;
       
       formElem = angular.element('<form r-validator="vm.validator"><div r-validate-class="vm.model.firstName"></div></form>');
-	    $compile(formElem)($scope);
+      var repeatElem = angular.element('<div ng-repeat="friend in vm.model.friends"><div r-validate-class="friend.firstName"></div></div>');
+	    formElem.append(repeatElem);
+      $compile(formElem)($scope);
 	    elem = angular.element(formElem.children()[0]);
     });
     

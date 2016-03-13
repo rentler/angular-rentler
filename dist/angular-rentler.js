@@ -72,6 +72,43 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       // Find field name
       var fieldName = _.last(bind.split('.'));
       
+      // ngRepeat
+      if (_.has(scope.$parent, '$index')) {
+        // Get item binding
+        var item = attrs.rValidateMsg.split('.')[0];
+        
+        // Find ngRepeat collection
+        var ngRepeatElem = element;
+        var ngRepeatCollection, ngRepeatItem;
+        do {
+          ngRepeatElem = ngRepeatElem.parent();
+          
+          // No element
+          if (!ngRepeatElem) break;
+          
+          // No ngRepeat
+          if (!ngRepeatElem[0].hasAttribute('ng-repeat') &&
+              !ngRepeatElem[0].hasAttribute('data-ng-repeat'))
+            continue;
+          
+          // Get ngRepeat expression
+          var ngRepeatExp = ngRepeatElem.attr('ng-repeat') || 
+                            ngRepeatElem.attr('data-ng-repeat');
+                            
+          // Deconstrcut ngRepeat expression      
+          var ngRepeatMatch = ngRepeatExp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
+          
+          // Get ngRepeat item
+          var ngRepeatItemMatch = ngRepeatMatch[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
+          ngRepeatItem = ngRepeatItemMatch[3] || ngRepeatItemMatch[1];
+          
+          // Get ngRepeat collection
+          ngRepeatCollection = _.last(ngRepeatMatch[2].split('.'));
+        } while (ngRepeatItem !== item);
+        
+        fieldName = ngRepeatCollection + '[' + scope.$index + '].' + fieldName;
+      }
+      
       // Build path to field error
       var path = rValidatorCtrl.attr;
       
@@ -89,6 +126,98 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
 
 })();
+(function () {
+  'use strict';
+
+  angular
+    .module('rentler.core')
+    .directive('ngModel', ValidateDirective);
+
+  ValidateDirective.$inject = [];
+
+  function ValidateDirective() {
+    var directive = {
+      restrict: 'A',
+      require: ['ngModel', '?^rValidator'],
+      link: link
+    };
+
+    return directive;
+
+    function link(scope, element, attrs, ctrls) {
+      // Get controllers
+      var ngModelCtrl = ctrls[0],
+          rValidatorCtrl = ctrls[1];
+          
+      // No validation
+      if (!rValidatorCtrl) return;
+
+      // If there is no validator then return
+      var validator = _.get(rValidatorCtrl, 'validator');
+      if (!validator) return;
+      
+      // Find field name
+      var fieldName = _.last(attrs.ngModel.split('.'));
+      
+      // ngRepeat
+      if (_.has(scope, '$index')) {
+        // TODO: Check field for '[]'
+        
+        // Get item binding
+        var item = attrs.ngModel.split('.')[0];
+        
+        // Find ngRepeat collection
+        var ngRepeatElem = element;
+        var ngRepeatCollection, ngRepeatItem;
+        do {
+          ngRepeatElem = ngRepeatElem.parent();
+          
+          // No element
+          if (!ngRepeatElem) break;
+          
+          // No ngRepeat
+          if (!ngRepeatElem[0].hasAttribute('ng-repeat') &&
+              !ngRepeatElem[0].hasAttribute('data-ng-repeat'))
+            continue;
+          
+          // Get ngRepeat expression
+          var ngRepeatExp = ngRepeatElem.attr('ng-repeat') || 
+                            ngRepeatElem.attr('data-ng-repeat');
+                            
+          // Deconstrcut ngRepeat expression      
+          var ngRepeatMatch = ngRepeatExp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
+          
+          // Get ngRepeat item
+          var ngRepeatItemMatch = ngRepeatMatch[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
+          ngRepeatItem = ngRepeatItemMatch[3] || ngRepeatItemMatch[1];
+          
+          // Get ngRepeat collection
+          ngRepeatCollection = _.last(ngRepeatMatch[2].split('.'));
+        } while (ngRepeatItem !== item);
+        
+        fieldName = ngRepeatCollection + '[' + scope.$index + '].' + fieldName;
+      }
+      
+      // Not in validator schema
+      if (!_.has(validator.schema, fieldName))
+        return;
+      
+      // Watch for changes on the field
+      scope.$watch(attrs.ngModel, function () {
+        // Validate
+        validator.validate();
+
+        // Get the number of errors for the field
+        var length = validator.errors[fieldName].length;
+        var isValid = length === 0;
+        
+        // Set validity
+        ngModelCtrl.$setValidity('', isValid);
+      });
+    }
+  }
+
+}());
 (function () {
   'use strict';
 
@@ -118,6 +247,43 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       // Find field name
       var fieldName = _.last(bind.split('.'));
       
+      // ngRepeat
+      if (_.has(scope, '$index')) {
+        // Get item binding
+        var item = attrs.rValidateClass.split('.')[0];
+        
+        // Find ngRepeat collection
+        var ngRepeatElem = element;
+        var ngRepeatCollection, ngRepeatItem;
+        do {
+          ngRepeatElem = ngRepeatElem.parent();
+          
+          // No element
+          if (!ngRepeatElem) break;
+          
+          // No ngRepeat
+          if (!ngRepeatElem[0].hasAttribute('ng-repeat') &&
+              !ngRepeatElem[0].hasAttribute('data-ng-repeat'))
+            continue;
+          
+          // Get ngRepeat expression
+          var ngRepeatExp = ngRepeatElem.attr('ng-repeat') || 
+                            ngRepeatElem.attr('data-ng-repeat');
+                            
+          // Deconstrcut ngRepeat expression      
+          var ngRepeatMatch = ngRepeatExp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
+          
+          // Get ngRepeat item
+          var ngRepeatItemMatch = ngRepeatMatch[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
+          ngRepeatItem = ngRepeatItemMatch[3] || ngRepeatItemMatch[1];
+          
+          // Get ngRepeat collection
+          ngRepeatCollection = _.last(ngRepeatMatch[2].split('.'));
+        } while (ngRepeatItem !== item);
+        
+        fieldName = ngRepeatCollection + '[' + scope.$index + '].' + fieldName;
+      }
+      
       // Build path to errors
       var path = rValidatorCtrl.attr;
       
@@ -135,53 +301,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
         if (length === 0) element.removeClass(Validation.getClasses().error).addClass(Validation.getClasses().success);
         else if (length > 0) element.addClass(Validation.getClasses().error).removeClass(Validation.getClasses().success);
       }, true);
-    }
-  }
-
-}());
-(function () {
-  'use strict';
-
-  angular
-    .module('rentler.core')
-    .directive('ngModel', ValidateDirective);
-
-  ValidateDirective.$inject = [];
-
-  function ValidateDirective() {
-    var directive = {
-      restrict: 'A',
-      require: ['ngModel', '?^rValidator'],
-      link: link
-    };
-
-    return directive;
-
-    function link(scope, element, attrs, ctrls) {
-      // Get controllers
-      var ngModelCtrl = ctrls[0],
-          rValidatorCtrl = ctrls[1];
-
-      // If there is no validator then return
-      var validator = _.get(rValidatorCtrl, 'validator');
-      
-      if (!validator) return;
-      
-      // Watch for changes on the field
-      scope.$watch(attrs.ngModel, function () {
-        // Validate
-        validator.validate();
-        
-        // Find field name
-        var fieldName = _.last(attrs.ngModel.split('.'));
-        
-        // Get the number of errors for the field
-        var length = validator.errors[fieldName].length;
-        var isValid = length === 0;
-        
-        // Set validity
-        ngModelCtrl.$setValidity('', isValid);
-      });
     }
   }
 
@@ -277,6 +396,36 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     }
   }
 
+}());
+(function () {
+  'use strict';
+  
+  angular
+  	.module('rentler.core')
+	.factory('Instantiable', InstantiableFactory);
+	
+  InstantiableFactory.$inject = [];
+  
+  function InstantiableFactory() {
+	var mixin = {
+	  create: create
+	};
+	
+	return mixin;
+	
+	function create(opts) {
+	  var _this = this;
+	  
+	  var instance = _.cloneDeep(_this);
+	  
+	  _.assign(instance, opts);
+	  
+	  _.bindAll(instance, _.functions(instance));
+    
+	  return instance;
+	}
+  }
+  
 }());
 (function () {
   'use strict';
@@ -647,6 +796,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     function create(schema, model) {
       var validator = {
         validate: validate,
+        schema: schema,
         errors: {},
         isValid: true,
         timestamp: 0
@@ -656,60 +806,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
         var _this = this;
         
         _validate(schema);
-        
-        // _.forIn(schema, function (validators, field) {
-        //   // If field(s) are provided skip those that aren't included
-        //   if (fields && (_.isString(fields) && fields !== field) ||
-        //                 (_.isArray(fields) && !_.includes(fields, field)))
-        //     return;
-          
-        //   // Skip if validate function results in falsey
-        //   if (_.has(validators, 'validateIf') && 
-        //       _.isFunction(validators.validateIf) && 
-        //       !validators.validateIf(model))
-        //     return;
-            
-        //   // Reset validation for field
-        //   _this.errors[field] = [];
-          
-        //   _.forIn(validators, function (validatorOpts, validatorName) {
-        //     // Skip validate field as it is special
-        //     if (validatorName.toLowerCase() === 'validateif')
-        //       return;
-              
-        //     // Collections
-        //     if (validatorName === 'collection') {
-        //       var collectionSchema = validatorOpts;
-              
-        //       _.forIn(collectionSchema, function (collectionValidators, collectionField) {
-        //         _.forIn(model[field], function (item, index) {
-        //           // Call validate like you would normally
-        //           var itemFieldName = field + '[' + index + ']';
-        //           _.bind(_validate, _this, itemFieldName);
-        //           // validate(friends[0])
-        //         });
-        //       });
-              
-        //       return;
-        //     }
-              
-        //     // Get the validator and validate
-        //     var factoryValidatorName = _.upperFirst(validatorName) + 'Validator',
-        //         validator = $injector.get(factoryValidatorName),
-        //         isValid = validator.validate(model[field], model, validatorOpts);
-                
-        //     // Add any errors to the field if invalid
-        //     if (!isValid) {
-        //       var message = _.isString(validatorOpts.message) ? validatorOpts.message :
-        //                     _.isFunction(validatorOpts.message) ? validatorOpts.message(field, validatorOpts) :
-        //                     _.isString(validator.message) ? validator.message :
-        //                     _.isFunction(validator.message) ? validator.message(field, validatorOpts) :
-        //                     'Invalid';
-
-        //       _this.errors[field].push(message);
-        //     }
-        //   });
-        // });
         
         function _validate(schema) {
           _.forIn(schema, function (validators, field) {
@@ -771,14 +867,17 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
           });
         }
         
+        // Set model validation state
         _this.isValid = _(_this.errors)
                           .values()
                           .flatten()
                           .value()
                           .length === 0;
         
+        // Set timestamp
         _this.timestamp = _.now();
         
+        // Return model validation state for fields
         var isValid = _(_this.errors)
                         .pick(fields || _.keys(schema))
                         .values()
@@ -828,36 +927,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 	  function getClasses() {
 		return classes;
 	  }
-	}
-  }
-  
-}());
-(function () {
-  'use strict';
-  
-  angular
-  	.module('rentler.core')
-	.factory('Instantiable', InstantiableFactory);
-	
-  InstantiableFactory.$inject = [];
-  
-  function InstantiableFactory() {
-	var mixin = {
-	  create: create
-	};
-	
-	return mixin;
-	
-	function create(opts) {
-	  var _this = this;
-	  
-	  var instance = _.cloneDeep(_this);
-	  
-	  _.assign(instance, opts);
-	  
-	  _.bindAll(instance, _.functions(instance));
-    
-	  return instance;
 	}
   }
   

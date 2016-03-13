@@ -22,13 +22,25 @@
         },
         middleName: {
           required: false
+        },
+        friends: {
+          collection: {
+            name: {
+              required: true
+            }
+          }
         }
       };
       
       model = {
         firstName: 'John',
         lastName: 'Doe',
-        middleName: ''
+        middleName: '',
+        friends: [
+          { name: 'first' },
+          { name: 'second' },
+          { name: '' }
+        ]
       };
       
       validator = Validator.create(schema, model);
@@ -41,7 +53,9 @@
       
       var formElem = angular.element('<form r-validator="vm.validator"></form>');
       var inputElem = angular.element('<input type="text" ng-model="vm.model.firstName" />');
+      var repeatElem = angular.element('<div ng-repeat="friend in vm.model.friends"><input type="text" ng-model="friend.name" /></div>');
       formElem.append(inputElem);
+      formElem.append(repeatElem);
       $compile(formElem)($scope);
 
       ngModelCtrl = inputElem.controller('ngModel');
@@ -68,6 +82,9 @@
       
       expect(ngModelCtrl.$valid).toBe(false);
       expect(ngModelCtrl.$invalid).toBe(true);
+    });
+    
+    it('should work with ngRepeat', function () {
     });
   });
   
