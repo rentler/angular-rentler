@@ -15,20 +15,37 @@
       },
       controller: Ctrl
     };
+    
     return directive;
   }
   
-  Ctrl.$inject = ['$scope', '$attrs'];
+  Ctrl.$inject = ['$scope', '$attrs', '$timeout'];
   
-  function Ctrl($scope, $attrs) {
+  function Ctrl($scope, $attrs, $timeout) {
     var vm = this;
     
+    vm.attr = $attrs.rValidator;
+    vm.validator = $scope.rValidator;
+    vm.listeners = [];
+    
+    // TODO: More Checks
     if (!_.has($scope.rValidator, 'validate') &&
         !_.isFunction($scope.rValidator.validate))
       throw 'Invalid Validator.';
     
-    vm.attr = $attrs.rValidator;
-    vm.validator = $scope.rValidator;
+    // Watch for model changes
+    $scope.$watch('rValidator.model', function () {
+      $timeout(function () {
+        // Validate
+        vm.validator.validate();
+        
+        // Fire listeners
+        _.forEach(vm.listeners, function (listener) {
+          listener();
+        });
+      });
+
+    }, true);
   }
     
 })();

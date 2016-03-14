@@ -3,14 +3,14 @@
 
   angular
     .module('rentler.core')
-    .directive('ngModel', ValidateDirective);
+    .directive('ngModel', Directive);
 
-  ValidateDirective.$inject = [];
+  Directive.$inject = [];
 
-  function ValidateDirective() {
+  function Directive() {
     var directive = {
       restrict: 'A',
-      require: ['ngModel', '?^rValidator'],
+      require: ['ngModel', '?^rValidator', '?^ngRepeat'],
       link: link
     };
 
@@ -19,73 +19,84 @@
     function link(scope, element, attrs, ctrls) {
       // Get controllers
       var ngModelCtrl = ctrls[0],
-          rValidatorCtrl = ctrls[1];
+          rValidatorCtrl = ctrls[1],
+          ngRepeatCtrl = ctrls[2];
           
       // No validation
       if (!rValidatorCtrl) return;
-
-      // If there is no validator then return
+      
+      // Get validator
       var validator = _.get(rValidatorCtrl, 'validator');
-      if (!validator) return;
+      
+      var ngRepeat = ngRepeatCtrl;
       
       // Find field name
-      var fieldName = _.last(attrs.ngModel.split('.'));
+      var fieldName = '';
+      // ng-model="vm.user.name.first.abbreviation"
+      if (ngRepeat === null)
+        fieldName = attrs.ngModel;
       
-      // ngRepeat
-      if (_.has(scope, '$index')) {
-        // TODO: Check field for '[]'
+      // Find field name in ngRepeat
+      while (ngRepeat !== null) {
+        var index = ngRepeat.index,
+            itemName = ngRepeat.itemName,
+            collectionName = ngRepeat.collectionName,
+            name = name || attrs.ngModel,
+            nameParts = name.split('.'),
+            tempFieldName = '';
         
-        // Get item binding
-        var item = attrs.ngModel.split('.')[0];
+        if (name.indexOf(itemName) > -1) {
+          tempFieldName = collectionName;
+        }
         
-        // Find ngRepeat collection
-        var ngRepeatElem = element;
-        var ngRepeatCollection, ngRepeatItem;
-        do {
-          ngRepeatElem = ngRepeatElem.parent();
+        if (itemName === _.first(nameParts)) {
           
-          // No element
-          if (!ngRepeatElem) break;
+          tempFieldName += '[' + index + ']';
           
-          // No ngRepeat
-          if (!ngRepeatElem[0].hasAttribute('ng-repeat') &&
-              !ngRepeatElem[0].hasAttribute('data-ng-repeat'))
-            continue;
+          if (nameParts.length > 1) {
+            tempFieldName += '.' + _.tail(nameParts).join('.');
+          }
+          if (ngRepeat.ngRepeat) {
+            tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
+          }
           
-          // Get ngRepeat expression
-          var ngRepeatExp = ngRepeatElem.attr('ng-repeat') || 
-                            ngRepeatElem.attr('data-ng-repeat');
-                            
-          // Deconstrcut ngRepeat expression      
-          var ngRepeatMatch = ngRepeatExp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
-          
-          // Get ngRepeat item
-          var ngRepeatItemMatch = ngRepeatMatch[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
-          ngRepeatItem = ngRepeatItemMatch[3] || ngRepeatItemMatch[1];
-          
-          // Get ngRepeat collection
-          ngRepeatCollection = _.last(ngRepeatMatch[2].split('.'));
-        } while (ngRepeatItem !== item);
+          name = _.first(collectionName.split('.'));
+        }
         
-        fieldName = ngRepeatCollection + '[' + scope.$index + '].' + fieldName;
+        fieldName = tempFieldName + '.' + fieldName;
+        fieldName = _.trim(fieldName, '.');
+        
+        ngRepeat = ngRepeat.ngRepeat;
       }
       
-      // Not in validator schema
-      // if (!_.has(validator.schema, fieldName))
-      //   return;
-      
-      // Watch for changes on the field
-      scope.$watch(attrs.ngModel, function () {
-        // Validate
-        validator.validate();
+      // Remove model prefix from field name
+      var i = 0, parts = fieldName.split('.'), modelPath = '';
+      do {
+        modelPath = modelPath + '.' + parts[i];
+        modelPath = _.trim(modelPath, '.');
+        
+        if (_.result(scope, modelPath) === validator.model)
+          break;
+          
+        i++;
+      } while (i <= parts.length);
 
+      fieldName = _.replace(fieldName, modelPath, '');
+      fieldName = _.trim(fieldName, '.');
+
+      // TODO: Check if field is in schema
+      
+      // Add to validation listeners
+      rValidatorCtrl.listeners.push(listener);
+
+      function listener() {
         // Get the number of errors for the field
         var length = validator.errors[fieldName].length;
         var isValid = length === 0;
         
         // Set validity
         ngModelCtrl.$setValidity('', isValid);
-      });
+      }
     }
   }
 

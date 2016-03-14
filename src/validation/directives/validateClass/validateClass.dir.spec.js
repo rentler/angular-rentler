@@ -68,20 +68,20 @@
     it('should add error class exclusively to element when invalid', function () {
       validator.validate();
       formElem.triggerHandler('submit');
-      $scope.$digest();
-
-      expect(elem.hasClass(Validation.getClasses().error)).toBe(true);
-      expect(elem.hasClass(Validation.getClasses().success)).toBe(false);
+      $scope.$digest(function () {
+        expect(elem.hasClass(Validation.getClasses().error)).toBe(true);
+        expect(elem.hasClass(Validation.getClasses().success)).toBe(false);
+      });
     });
     
     it('should add success class exclusively to element when valid', function () {
       model.firstName = 'John';
       validator.validate();
       formElem.triggerHandler('submit');
-      $scope.$digest();
-
-      expect(elem.hasClass(Validation.getClasses().error)).toBe(false);
-      expect(elem.hasClass(Validation.getClasses().success)).toBe(true);
+      $scope.$digest(function () {
+        expect(elem.hasClass(Validation.getClasses().error)).toBe(false);
+        expect(elem.hasClass(Validation.getClasses().success)).toBe(true);
+      });
     });
   
   });

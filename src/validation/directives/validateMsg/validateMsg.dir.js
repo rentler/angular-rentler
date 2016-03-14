@@ -10,7 +10,7 @@
   function ValidateMsgDirective() {
     var directive = {
       restrict: 'A',
-      require: ['^form', '^rValidator'],
+      require: ['^form', '^rValidator', '?^ngRepeat'],
       scope: true,
       link: link,
       replace: true,
@@ -22,64 +22,77 @@
     function link(scope, element, attrs, ctrls) {
       // Get controllers
       var formCtrl = ctrls[0],
-          rValidatorCtrl = ctrls[1];
+          rValidatorCtrl = ctrls[1],
+          ngRepeatCtrl = ctrls[2];
 
-      // Get binding
-      var bind = attrs.rValidateMsg;
+      // Get validator
+      var validator = _.get(rValidatorCtrl, 'validator');
+      
+      var ngRepeat = ngRepeatCtrl;
       
       // Find field name
-      var fieldName = _.last(bind.split('.'));
+      var fieldName = '';
+      // ng-model="vm.user.name.first.abbreviation"
+      if (ngRepeat === null)
+        fieldName = attrs.rValidateMsg;
       
-      // ngRepeat
-      if (_.has(scope.$parent, '$index')) {
-        // Get item binding
-        var item = attrs.rValidateMsg.split('.')[0];
+      // Find field name in ngRepeat
+      while (ngRepeat !== null) {
+        var index = ngRepeat.index,
+            itemName = ngRepeat.itemName,
+            collectionName = ngRepeat.collectionName,
+            name = name || attrs.rValidateMsg,
+            nameParts = name.split('.'),
+            tempFieldName = '';
         
-        // Find ngRepeat collection
-        var ngRepeatElem = element;
-        var ngRepeatCollection, ngRepeatItem;
-        do {
-          ngRepeatElem = ngRepeatElem.parent();
-          
-          // No element
-          if (!ngRepeatElem) break;
-          
-          // No ngRepeat
-          if (!ngRepeatElem[0].hasAttribute('ng-repeat') &&
-              !ngRepeatElem[0].hasAttribute('data-ng-repeat'))
-            continue;
-          
-          // Get ngRepeat expression
-          var ngRepeatExp = ngRepeatElem.attr('ng-repeat') || 
-                            ngRepeatElem.attr('data-ng-repeat');
-                            
-          // Deconstrcut ngRepeat expression      
-          var ngRepeatMatch = ngRepeatExp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
-          
-          // Get ngRepeat item
-          var ngRepeatItemMatch = ngRepeatMatch[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
-          ngRepeatItem = ngRepeatItemMatch[3] || ngRepeatItemMatch[1];
-          
-          // Get ngRepeat collection
-          ngRepeatCollection = _.last(ngRepeatMatch[2].split('.'));
-        } while (ngRepeatItem !== item);
+        if (name.indexOf(itemName) > -1) {
+          tempFieldName = collectionName;
+        }
         
-        fieldName = ngRepeatCollection + '[' + scope.$index + '].' + fieldName;
+        if (itemName === _.first(nameParts)) {
+          
+          tempFieldName += '[' + index + ']';
+          
+          if (nameParts.length > 1) {
+            tempFieldName += '.' + _.tail(nameParts).join('.');
+          }
+          if (ngRepeat.ngRepeat) {
+            tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
+          }
+          
+          name = _.first(collectionName.split('.'));
+        }
+        
+        fieldName = tempFieldName + '.' + fieldName;
+        fieldName = _.trim(fieldName, '.');
+        
+        ngRepeat = ngRepeat.ngRepeat;
       }
       
-      // Build path to field error
-      var path = rValidatorCtrl.attr;
-      
-      // Get validator
-      var validator = rValidatorCtrl.validator;
+      // Remove model prefix from field name
+      var i = 0, parts = fieldName.split('.'), modelPath = '';
+      do {
+        modelPath = modelPath + '.' + parts[i];
+        modelPath = _.trim(modelPath, '.');
+        
+        if (_.result(scope, modelPath) === validator.model)
+          break;
+          
+        i++;
+      } while (i <= parts.length);
 
-      scope.$watch(path, function () {
+      fieldName = _.replace(fieldName, modelPath, '');
+      fieldName = _.trim(fieldName, '.');
+
+      rValidatorCtrl.listeners.push(listener);
+      
+      function listener() {
         // Not submitted no validation
         if (!formCtrl.$submitted) return;
         
         // Add approriate classes
         scope.messages = _.has(validator.errors, fieldName) ? validator.errors[fieldName] : [];
-      }, true);
+      }
     }
   }
 

@@ -65,9 +65,10 @@
     it('should show errors when the form is submitted', function () {
       validator.validate();
       formElem.triggerHandler('submit');
-      $scope.$digest();
-      elem = angular.element(formElem.children()[0]);
-      expect(elem.text()).toBe('error');
+      $scope.$digest(function () {
+        elem = angular.element(formElem.children()[0]);
+        expect(elem.text()).toBe('error');
+      });
     });
   });
   

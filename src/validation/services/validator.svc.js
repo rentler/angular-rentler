@@ -18,6 +18,7 @@
       var validator = {
         validate: validate,
         schema: schema,
+        model: model,
         errors: {},
         isValid: true,
         timestamp: 0

@@ -10,7 +10,7 @@
   function ValidateClassDirective(Validation) {
     var directive = {
       restrict: 'A',
-      require: ['^form', '^rValidator'],
+      require: ['^form', '^rValidator', '?^ngRepeat'],
       link: link
     };
 
@@ -19,68 +19,83 @@
     function link(scope, element, attrs, ctrls) {
       // Get controllers
       var formCtrl = ctrls[0],
-          rValidatorCtrl = ctrls[1];
-
-      // Get binding
-      var bind = attrs.rValidateClass;
-      
-      // Find field name
-      var fieldName = _.last(bind.split('.'));
-      
-      // ngRepeat
-      if (_.has(scope, '$index')) {
-        // Get item binding
-        var item = attrs.rValidateClass.split('.')[0];
-        
-        // Find ngRepeat collection
-        var ngRepeatElem = element;
-        var ngRepeatCollection, ngRepeatItem;
-        do {
-          ngRepeatElem = ngRepeatElem.parent();
-          
-          // No element
-          if (!ngRepeatElem) break;
-          
-          // No ngRepeat
-          if (!ngRepeatElem[0].hasAttribute('ng-repeat') &&
-              !ngRepeatElem[0].hasAttribute('data-ng-repeat'))
-            continue;
-          
-          // Get ngRepeat expression
-          var ngRepeatExp = ngRepeatElem.attr('ng-repeat') || 
-                            ngRepeatElem.attr('data-ng-repeat');
-                            
-          // Deconstrcut ngRepeat expression      
-          var ngRepeatMatch = ngRepeatExp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
-          
-          // Get ngRepeat item
-          var ngRepeatItemMatch = ngRepeatMatch[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
-          ngRepeatItem = ngRepeatItemMatch[3] || ngRepeatItemMatch[1];
-          
-          // Get ngRepeat collection
-          ngRepeatCollection = _.last(ngRepeatMatch[2].split('.'));
-        } while (ngRepeatItem !== item);
-        
-        fieldName = ngRepeatCollection + '[' + scope.$index + '].' + fieldName;
-      }
-      
-      // Build path to errors
-      var path = rValidatorCtrl.attr;
+          rValidatorCtrl = ctrls[1],
+          ngRepeatCtrl = ctrls[2];
       
       // Get validator
-      var validator = rValidatorCtrl.validator;
+      var validator = _.get(rValidatorCtrl, 'validator');
+      
+      var ngRepeat = ngRepeatCtrl;
+      
+      // Find field name
+      var fieldName = '';
+      // ng-model="vm.user.name.first.abbreviation"
+      if (ngRepeat === null)
+        fieldName = attrs.rValidateClass;
+      
+      // Find field name in ngRepeat
+      while (ngRepeat !== null) {
+        var index = ngRepeat.index,
+            itemName = ngRepeat.itemName,
+            collectionName = ngRepeat.collectionName,
+            name = name || attrs.rValidateClass,
+            nameParts = name.split('.'),
+            tempFieldName = '';
+        
+        if (name.indexOf(itemName) > -1) {
+          tempFieldName = collectionName;
+        }
+        
+        if (itemName === _.first(nameParts)) {
+          
+          tempFieldName += '[' + index + ']';
+          
+          if (nameParts.length > 1) {
+            tempFieldName += '.' + _.tail(nameParts).join('.');
+          }
+          if (ngRepeat.ngRepeat) {
+            tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
+          }
+          
+          name = _.first(collectionName.split('.'));
+        }
+        
+        fieldName = tempFieldName + '.' + fieldName;
+        fieldName = _.trim(fieldName, '.');
+        
+        ngRepeat = ngRepeat.ngRepeat;
+      }
+      
+      // Remove model prefix from field name
+      var i = 0, parts = fieldName.split('.'), modelPath = '';
+      do {
+        modelPath = modelPath + '.' + parts[i];
+        modelPath = _.trim(modelPath, '.');
+        
+        if (_.result(scope, modelPath) === validator.model)
+          break;
+          
+        i++;
+      } while (i <= parts.length);
 
-      scope.$watch(path, function () {
+      fieldName = _.replace(fieldName, modelPath, '');
+      fieldName = _.trim(fieldName, '.');
+
+      // TODO: Check if field is in schema
+      
+      rValidatorCtrl.listeners.push(listener);
+      
+      function listener() {
         // Not submitted no validation
         if (!formCtrl.$submitted || !_.has(validator.errors, fieldName)) return;
         
-        // Get the number of errors for the field
+        // Get errors length
         var length = validator.errors[fieldName].length;
         
         // Add approriate classes
         if (length === 0) element.removeClass(Validation.getClasses().error).addClass(Validation.getClasses().success);
         else if (length > 0) element.addClass(Validation.getClasses().error).removeClass(Validation.getClasses().success);
-      }, true);
+      }
     }
   }
 

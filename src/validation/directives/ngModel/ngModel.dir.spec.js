@@ -38,8 +38,7 @@
         middleName: '',
         friends: [
           { name: 'first' },
-          { name: 'second' },
-          { name: '' }
+          { name: 'second' }
         ]
       };
       
@@ -65,10 +64,11 @@
       expect(validator.errors.firstName).not.toBeDefined();
       expect(validator.errors.lastName).not.toBeDefined();
       expect(validator.errors.middleName).not.toBeDefined();
-      $scope.$digest();
-      expect(validator.errors.firstName).toBeDefined();
-      expect(validator.errors.lastName).toBeDefined();
-      expect(validator.errors.middleName).toBeDefined();
+      $scope.$digest(function () {
+        expect(validator.errors.firstName).toBeDefined();
+        expect(validator.errors.lastName).toBeDefined();
+        expect(validator.errors.middleName).toBeDefined();
+      });
     });
     
     it('it should set the validity on ngModelController', function () {
@@ -78,13 +78,12 @@
       expect(ngModelCtrl.$invalid).toBe(false);
       
       model.firstName = '';
-      $scope.$digest();
+      $scope.$digest(function () {
+        expect(ngModelCtrl.$valid).toBe(false);
+        expect(ngModelCtrl.$invalid).toBe(true);
+      });
       
-      expect(ngModelCtrl.$valid).toBe(false);
-      expect(ngModelCtrl.$invalid).toBe(true);
-    });
-    
-    it('should work with ngRepeat', function () {
+      
     });
   });
   
