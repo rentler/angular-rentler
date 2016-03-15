@@ -42,7 +42,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       throw 'Invalid Validator.';
     
     // Watch for model changes
-    $scope.$watch('rValidator.model', function () {
+    $scope.$watch('rValidator', function () {
       $timeout(function () {
         // Validate
         vm.validator.validate();
@@ -408,34 +408,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 }());
 (function () {
   'use strict';
-
-  angular
-  	.module('rentler.core')
-	  .directive('form', FormDirective);
-
-  FormDirective.$inject = [];
-
-  function FormDirective() {
-    var directive = {
-      restrict: 'E',
-      require: '^form',
-      link: {
-        pre: pre
-      }
-    };
-
-    return directive;
-
-    function pre(scope, element, attrs, ctrl) {
-      element.on('submit', function () {
-        ctrl.$submitted = true;
-      });
-    }
-  }
-
-}());
-(function () {
-  'use strict';
   
   angular
   	.module('rentler.core')
@@ -498,6 +470,34 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
   
 })();
+(function () {
+  'use strict';
+
+  angular
+  	.module('rentler.core')
+	  .directive('form', FormDirective);
+
+  FormDirective.$inject = [];
+
+  function FormDirective() {
+    var directive = {
+      restrict: 'E',
+      require: '^form',
+      link: {
+        pre: pre
+      }
+    };
+
+    return directive;
+
+    function pre(scope, element, attrs, ctrl) {
+      element.on('submit', function () {
+        ctrl.$submitted = true;
+      });
+    }
+  }
+
+}());
 (function () {
   'use strict';
   
