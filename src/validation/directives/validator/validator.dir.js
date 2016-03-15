@@ -34,7 +34,7 @@
       throw 'Invalid Validator.';
     
     // Watch for model changes
-    $scope.$watch('rValidator.model', function () {
+    $scope.$watch('rValidator', function () {
       $timeout(function () {
         // Validate
         vm.validator.validate();
