@@ -24,57 +24,58 @@
         timestamp: 0
       };
       
+      return validator;
+      
       function validate(fields) {
         var _this = this;
         
         _validate(schema);
         
         function _validate(schema) {
+          // Iterate each field
           _.forIn(schema, function (validators, field) {
-            // If field(s) are provided skip those that aren't included
+            // Skip field if not included in field(s)
             if (fields && (_.isString(fields) && fields !== field) ||
                           (_.isArray(fields) && !_.includes(fields, field)))
-              return;
+                return;
+                
             
-            // Special validateif method can be put on the validator
-            // in order to only validate if that function returns true
-            if (_.has(validators, 'validateIf') && 
+            // Skip if validateIf results in falsey
+            if (_.has(validators, 'validateIf') &&
                 _.isFunction(validators.validateIf) && 
-                !validators.validateIf(model))
-              return;
-              
+                validators.validateIf(model) === false)
+                return;
+                
             // Reset validation for field
             _this.errors[field] = [];
             
+            // Iterate each validator
             _.forIn(validators, function (validatorOpts, validatorName) {
-              
-              // Skip validate field as it is special
-              // see the above comment
-              if (validatorName.toLowerCase() === 'validateif')
+              // Skip non-validators
+              if (validatorName === 'validateIf')
                 return;
-                
-              // Collections are a new addition allowing subschemas
+              
+              // Collections
               if (validatorName === 'collection') {
-                var collectionSchema = validatorOpts;
-                
-                // build a schema out of the item in the collection
-                _.forIn(model[field], function (item, index) {
-                  var itemSchema = _.clone(collectionSchema);
-                  itemSchema = _.mapKeys(itemSchema, function (value, key) {
-                    return field + '[' + index + '].' + key;
+                // Iterate collection items
+                _.forIn(_.result(model, field), function (value, index) {
+                  // Build schema with indices
+                  var itemSchema = _.mapKeys(validatorOpts, function (itemValue, itemField) {
+                    return field + '[' + index + '].' + itemField;
                   });
-
+                  
+                  // Validate
                   _validate(itemSchema);
                 });
                 
                 return;
               }
-                
+              
               // Get the validator and validate
               var factoryValidatorName = _.upperFirst(validatorName) + 'Validator',
                   validator = $injector.get(factoryValidatorName),
                   isValid = validator.validate(_.result(model, field), model, validatorOpts);
-              
+                  
               // Add any errors to the field if invalid
               if (!isValid) {
                 var message = _.isString(validatorOpts.message) ? validatorOpts.message :
@@ -89,28 +90,26 @@
           });
         }
         
-        // Set model validation state
         _this.isValid = _(_this.errors)
                           .values()
                           .flatten()
                           .value()
                           .length === 0;
         
-        // Set timestamp
-        _this.timestamp = _.now();
-        
-        // Return model validation state for fields
         var isValid = _(_this.errors)
                         .pick(fields || _.keys(schema))
                         .values()
                         .flatten()
                         .value()
                         .length === 0;
+                        
+        _this.timestamp = _.now();
 
         return isValid;
       }
       
-      return validator;
+
+      
     }
   }
     

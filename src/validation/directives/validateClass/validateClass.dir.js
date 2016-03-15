@@ -30,11 +30,11 @@
       // Find field name
       var fieldName = '';
       // ng-model="vm.user.name.first.abbreviation"
-      if (ngRepeat === null)
+      if (_.isEmpty(ngRepeat))
         fieldName = attrs.rValidateClass;
       
       // Find field name in ngRepeat
-      while (ngRepeat !== null) {
+      while (!_.isEmpty(ngRepeat)) {
         var index = ngRepeat.index,
             itemName = ngRepeat.itemName,
             collectionName = ngRepeat.collectionName,

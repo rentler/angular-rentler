@@ -4,35 +4,27 @@
   angular
     .module('rentler.core')
     .directive('ngRepeat', Directive);
-    
-  var ctrl = null;
-    
+  
   Directive.$inject = [];
   
   function Directive() {
     var directive = {
       restrict: 'EA',
-      require: '?^ngRepeat',
-      controller: controller,
-      link: link
+      controller: controller
     };
     
     return directive;
-    
-    function link(scope, element, attrs, ngRepeatCtrl) {
-      ctrl = ngRepeatCtrl;
-    }
   }
   
-  controller.$inject = ['$scope', '$attrs'];
+  controller.$inject = ['$scope', '$element', '$attrs'];
   
-  function controller($scope, $attrs) {
+  function controller($scope, $element, $attrs) {
     var _this = this;
     
     _this.index = $scope.$index;
     _this.collectionName = null;
     _this.itemName = null;
-    _this.ngRepeat = ctrl;
+    _this.ngRepeat = $element.parent().controller('ngRepeat');
     
     function init() {
       // Deconstruct expression
