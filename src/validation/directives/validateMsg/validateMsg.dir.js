@@ -32,41 +32,43 @@
       
       // Find field name
       var fieldName = '';
-      // ng-model="vm.user.name.first.abbreviation"
-      if (_.isEmpty(ngRepeat))
+
+      if (_.isEmpty(ngRepeat) || ngRepeat.itemName !== _.first(attrs.rValidateMsg.split('.'))) {
         fieldName = attrs.rValidateMsg;
-      
-      // Find field name in ngRepeat
-      while (!_.isEmpty(ngRepeat)) {
-        var index = ngRepeat.index,
-            itemName = ngRepeat.itemName,
-            collectionName = ngRepeat.collectionName,
-            name = name || attrs.rValidateMsg,
-            nameParts = name.split('.'),
-            tempFieldName = '';
-        
-        if (name.indexOf(itemName) > -1) {
-          tempFieldName = collectionName;
-        }
-        
-        if (itemName === _.first(nameParts)) {
+      }
+      else {
+        // Find field name in ngRepeat
+        while (!_.isEmpty(ngRepeat)) {
+          var index = ngRepeat.index,
+              itemName = ngRepeat.itemName,
+              collectionName = ngRepeat.collectionName,
+              name = name || attrs.rValidateMsg,
+              nameParts = name.split('.'),
+              tempFieldName = '';
           
-          tempFieldName += '[' + index + ']';
-          
-          if (nameParts.length > 1) {
-            tempFieldName += '.' + _.tail(nameParts).join('.');
-          }
-          if (ngRepeat.ngRepeat) {
-            tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
+          if (name.indexOf(itemName) > -1) {
+            tempFieldName = collectionName;
           }
           
-          name = _.first(collectionName.split('.'));
+          if (itemName === _.first(nameParts)) {
+            
+            tempFieldName += '[' + index + ']';
+            
+            if (nameParts.length > 1) {
+              tempFieldName += '.' + _.tail(nameParts).join('.');
+            }
+            if (ngRepeat.ngRepeat) {
+              tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
+            }
+            
+            name = _.first(collectionName.split('.'));
+          }
+          
+          fieldName = tempFieldName + '.' + fieldName;
+          fieldName = _.trim(fieldName, '.');
+          
+          ngRepeat = ngRepeat.ngRepeat;
         }
-        
-        fieldName = tempFieldName + '.' + fieldName;
-        fieldName = _.trim(fieldName, '.');
-        
-        ngRepeat = ngRepeat.ngRepeat;
       }
       
       // Remove model prefix from field name

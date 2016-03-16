@@ -91,41 +91,43 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       
       // Find field name
       var fieldName = '';
-      // ng-model="vm.user.name.first.abbreviation"
-      if (_.isEmpty(ngRepeat))
+
+      if (_.isEmpty(ngRepeat) || ngRepeat.itemName !== _.first(attrs.rValidateMsg.split('.'))) {
         fieldName = attrs.rValidateMsg;
-      
-      // Find field name in ngRepeat
-      while (!_.isEmpty(ngRepeat)) {
-        var index = ngRepeat.index,
-            itemName = ngRepeat.itemName,
-            collectionName = ngRepeat.collectionName,
-            name = name || attrs.rValidateMsg,
-            nameParts = name.split('.'),
-            tempFieldName = '';
-        
-        if (name.indexOf(itemName) > -1) {
-          tempFieldName = collectionName;
-        }
-        
-        if (itemName === _.first(nameParts)) {
+      }
+      else {
+        // Find field name in ngRepeat
+        while (!_.isEmpty(ngRepeat)) {
+          var index = ngRepeat.index,
+              itemName = ngRepeat.itemName,
+              collectionName = ngRepeat.collectionName,
+              name = name || attrs.rValidateMsg,
+              nameParts = name.split('.'),
+              tempFieldName = '';
           
-          tempFieldName += '[' + index + ']';
-          
-          if (nameParts.length > 1) {
-            tempFieldName += '.' + _.tail(nameParts).join('.');
-          }
-          if (ngRepeat.ngRepeat) {
-            tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
+          if (name.indexOf(itemName) > -1) {
+            tempFieldName = collectionName;
           }
           
-          name = _.first(collectionName.split('.'));
+          if (itemName === _.first(nameParts)) {
+            
+            tempFieldName += '[' + index + ']';
+            
+            if (nameParts.length > 1) {
+              tempFieldName += '.' + _.tail(nameParts).join('.');
+            }
+            if (ngRepeat.ngRepeat) {
+              tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
+            }
+            
+            name = _.first(collectionName.split('.'));
+          }
+          
+          fieldName = tempFieldName + '.' + fieldName;
+          fieldName = _.trim(fieldName, '.');
+          
+          ngRepeat = ngRepeat.ngRepeat;
         }
-        
-        fieldName = tempFieldName + '.' + fieldName;
-        fieldName = _.trim(fieldName, '.');
-        
-        ngRepeat = ngRepeat.ngRepeat;
       }
       
       // Remove model prefix from field name
@@ -156,108 +158,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
 
 })();
-(function () {
-  'use strict';
-
-  angular
-  	.module('rentler.core')
-	  .directive('rValidateClass', ValidateClassDirective);
-
-  ValidateClassDirective.$inject = ['Validation'];
-
-  function ValidateClassDirective(Validation) {
-    var directive = {
-      restrict: 'A',
-      require: ['^form', '^rValidator', '?^ngRepeat'],
-      link: link
-    };
-
-    return directive;
-
-    function link(scope, element, attrs, ctrls) {
-      // Get controllers
-      var formCtrl = ctrls[0],
-          rValidatorCtrl = ctrls[1],
-          ngRepeatCtrl = ctrls[2];
-      
-      // Get validator
-      var validator = _.get(rValidatorCtrl, 'validator');
-      
-      var ngRepeat = ngRepeatCtrl;
-      
-      // Find field name
-      var fieldName = '';
-      // ng-model="vm.user.name.first.abbreviation"
-      if (_.isEmpty(ngRepeat))
-        fieldName = attrs.rValidateClass;
-      
-      // Find field name in ngRepeat
-      while (!_.isEmpty(ngRepeat)) {
-        var index = ngRepeat.index,
-            itemName = ngRepeat.itemName,
-            collectionName = ngRepeat.collectionName,
-            name = name || attrs.rValidateClass,
-            nameParts = name.split('.'),
-            tempFieldName = '';
-        
-        if (name.indexOf(itemName) > -1) {
-          tempFieldName = collectionName;
-        }
-        
-        if (itemName === _.first(nameParts)) {
-          
-          tempFieldName += '[' + index + ']';
-          
-          if (nameParts.length > 1) {
-            tempFieldName += '.' + _.tail(nameParts).join('.');
-          }
-          if (ngRepeat.ngRepeat) {
-            tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
-          }
-          
-          name = _.first(collectionName.split('.'));
-        }
-        
-        fieldName = tempFieldName + '.' + fieldName;
-        fieldName = _.trim(fieldName, '.');
-        
-        ngRepeat = ngRepeat.ngRepeat;
-      }
-      
-      // Remove model prefix from field name
-      var i = 0, parts = fieldName.split('.'), modelPath = '';
-      do {
-        modelPath = modelPath + '.' + parts[i];
-        modelPath = _.trim(modelPath, '.');
-        
-        if (_.result(scope, modelPath) === validator.model)
-          break;
-          
-        i++;
-      } while (i <= parts.length);
-
-      fieldName = _.replace(fieldName, modelPath, '');
-      fieldName = _.trim(fieldName, '.');
-
-      // TODO: Check if field is in schema
-      
-      rValidatorCtrl.listeners.push(listener);
-      
-      function listener() {
-        // Not submitted no validation
-        if (!formCtrl.$submitted || !_.has(validator.errors, fieldName)) return;
-        
-        // Get errors length
-        var length = validator.errors[fieldName].length;
-        
-        // Add approriate classes
-        if (length === 0) element.removeClass(Validation.getClasses().error).addClass(Validation.getClasses().success);
-        else if (length > 0) element.addClass(Validation.getClasses().error).removeClass(Validation.getClasses().success);
-      }
-    }
-  }
-
-}());
 (function () {
   'use strict';
   
@@ -307,6 +207,110 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   'use strict';
 
   angular
+  	.module('rentler.core')
+	  .directive('rValidateClass', ValidateClassDirective);
+
+  ValidateClassDirective.$inject = ['Validation'];
+
+  function ValidateClassDirective(Validation) {
+    var directive = {
+      restrict: 'A',
+      require: ['^form', '^rValidator', '?^ngRepeat'],
+      link: link
+    };
+
+    return directive;
+
+    function link(scope, element, attrs, ctrls) {
+      // Get controllers
+      var formCtrl = ctrls[0],
+          rValidatorCtrl = ctrls[1],
+          ngRepeatCtrl = ctrls[2];
+      
+      // Get validator
+      var validator = _.get(rValidatorCtrl, 'validator');
+      
+      var ngRepeat = ngRepeatCtrl;
+      
+      // Find field name
+      var fieldName = '';
+
+      if (_.isEmpty(ngRepeat) || ngRepeat.itemName !== _.first(attrs.rValidateClass.split('.'))) {
+        fieldName = attrs.rValidateClass;
+      }
+      else {
+        // Find field name in ngRepeat
+        while (!_.isEmpty(ngRepeat)) {
+          var index = ngRepeat.index,
+              itemName = ngRepeat.itemName,
+              collectionName = ngRepeat.collectionName,
+              name = name || attrs.rValidateClass,
+              nameParts = name.split('.'),
+              tempFieldName = '';
+          
+          if (name.indexOf(itemName) > -1) {
+            tempFieldName = collectionName;
+          }
+          
+          if (itemName === _.first(nameParts)) {
+            
+            tempFieldName += '[' + index + ']';
+            
+            if (nameParts.length > 1) {
+              tempFieldName += '.' + _.tail(nameParts).join('.');
+            }
+            if (ngRepeat.ngRepeat) {
+              tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
+            }
+            
+            name = _.first(collectionName.split('.'));
+          }
+          
+          fieldName = tempFieldName + '.' + fieldName;
+          fieldName = _.trim(fieldName, '.');
+          
+          ngRepeat = ngRepeat.ngRepeat;
+        }
+      }
+      
+      // Remove model prefix from field name
+      var i = 0, parts = fieldName.split('.'), modelPath = '';
+      do {
+        modelPath = modelPath + '.' + parts[i];
+        modelPath = _.trim(modelPath, '.');
+        
+        if (_.result(scope, modelPath) === validator.model)
+          break;
+          
+        i++;
+      } while (i <= parts.length);
+
+      fieldName = _.replace(fieldName, modelPath, '');
+      fieldName = _.trim(fieldName, '.');
+
+      // TODO: Check if field is in schema
+      
+      rValidatorCtrl.listeners.push(listener);
+      
+      function listener() {
+        // Not submitted no validation
+        if (!formCtrl.$submitted || !_.has(validator.errors, fieldName)) return;
+        
+        // Get errors length
+        var length = validator.errors[fieldName].length;
+        
+        // Add approriate classes
+        if (length === 0) element.removeClass(Validation.getClasses().error).addClass(Validation.getClasses().success);
+        else if (length > 0) element.addClass(Validation.getClasses().error).removeClass(Validation.getClasses().success);
+      }
+    }
+  }
+
+}());
+(function () {
+  'use strict';
+
+  angular
     .module('rentler.core')
     .directive('ngModel', Directive);
 
@@ -338,40 +342,42 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       // Find field name
       var fieldName = '';
 
-      if (_.isEmpty(ngRepeat))
+      if (_.isEmpty(ngRepeat) || ngRepeat.itemName !== _.first(attrs.ngModel.split('.'))) {
         fieldName = attrs.ngModel;
-      
-      // Find field name in ngRepeat
-      while (!_.isEmpty(ngRepeat)) {
-        var index = ngRepeat.index,
-            itemName = ngRepeat.itemName,
-            collectionName = ngRepeat.collectionName,
-            name = name || attrs.ngModel,
-            nameParts = name.split('.'),
-            tempFieldName = '';
-        
-        if (name.indexOf(itemName) > -1) {
-          tempFieldName = collectionName;
-        }
-        
-        if (itemName === _.first(nameParts)) {
+      }
+      else {
+        // Find field name in ngRepeat
+        while (!_.isEmpty(ngRepeat)) {
+          var index = ngRepeat.index,
+              itemName = ngRepeat.itemName,
+              collectionName = ngRepeat.collectionName,
+              name = name || attrs.ngModel,
+              nameParts = name.split('.'),
+              tempFieldName = '';
           
-          tempFieldName += '[' + index + ']';
-          
-          if (nameParts.length > 1) {
-            tempFieldName += '.' + _.tail(nameParts).join('.');
-          }
-          if (ngRepeat.ngRepeat) {
-            tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
+          if (name.indexOf(itemName) > -1) {
+            tempFieldName = collectionName;
           }
           
-          name = _.first(collectionName.split('.'));
+          if (itemName === _.first(nameParts)) {
+            
+            tempFieldName += '[' + index + ']';
+            
+            if (nameParts.length > 1) {
+              tempFieldName += '.' + _.tail(nameParts).join('.');
+            }
+            if (ngRepeat.ngRepeat) {
+              tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
+            }
+            
+            name = _.first(collectionName.split('.'));
+          }
+          
+          fieldName = tempFieldName + '.' + fieldName;
+          fieldName = _.trim(fieldName, '.');
+          
+          ngRepeat = ngRepeat.ngRepeat;
         }
-        
-        fieldName = tempFieldName + '.' + fieldName;
-        fieldName = _.trim(fieldName, '.');
-        
-        ngRepeat = ngRepeat.ngRepeat;
       }
       
       // Remove model prefix from field name
@@ -470,64 +476,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
   
 })();
-// (function () {
-//   'use strict';
-
-//   angular
-//   	.module('rentler.core')
-// 	  .directive('form', FormDirective);
-
-//   FormDirective.$inject = [];
-
-//   function FormDirective() {
-//     var directive = {
-//       restrict: 'E',
-//       require: '^form',
-//       link: {
-//         pre: pre
-//       }
-//     };
-
-//     return directive;
-
-//     function pre(scope, element, attrs, ctrl) {
-//       element.on('submit', function () {
-//         ctrl.$submitted = true;
-//       });
-//     }
-//   }
-
-// }());
-(function () {
-  'use strict';
-  
-  angular
-  	.module('rentler.core')
-	.factory('Instantiable', InstantiableFactory);
-	
-  InstantiableFactory.$inject = [];
-  
-  function InstantiableFactory() {
-	var mixin = {
-	  create: create
-	};
-	
-	return mixin;
-	
-	function create(opts) {
-	  var _this = this;
-	  
-	  var instance = _.cloneDeep(_this);
-	  
-	  _.assign(instance, opts);
-	  
-	  _.bindAll(instance, _.functions(instance));
-    
-	  return instance;
-	}
-  }
-  
-}());
 (function () {
   'use strict';
   
@@ -994,40 +942,70 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
     
 })();
+(function() {
+  'use strict';
+
+  angular
+    .module('rentler.core')
+    .provider('Validation', ValidationProvider);
+
+  ValidationProvider.$inject = [];
+
+  function ValidationProvider() {
+    var classes = {
+      success: 'has-success',
+      warning: 'has-warning',
+      error: 'has-error'
+    };
+
+    this.setClasses = setClasses;
+    this.$get = Validation;
+
+    function setClasses(opts) {
+      opts = _.pick(opts, _.keys(classes));
+      _.merge(classes, opts);
+    }
+
+    function Validation() {
+      var service = {
+        getClasses: getClasses
+      };
+
+      return service;
+
+      function getClasses() {
+        return classes;
+      }
+    }
+  }
+
+} ());
 (function () {
   'use strict';
   
   angular
-    .module('rentler.core')
-  	.provider('Validation', ValidationProvider);
-	  
-  ValidationProvider.$inject = [];
+  	.module('rentler.core')
+	.factory('Instantiable', InstantiableFactory);
+	
+  InstantiableFactory.$inject = [];
   
-  function ValidationProvider() {
-	var classes = {
-	  success: 'has-success',
-	  warning: 'has-warning',
-	  error: 'has-error'	
+  function InstantiableFactory() {
+	var mixin = {
+	  create: create
 	};
 	
-	this.setClasses = setClasses;
-	this.$get = Validation;
+	return mixin;
 	
-	function setClasses(opts) {
-	  opts = _.pick(opts, _.keys(classes));
-	  _.merge(classes, opts);
-	}
-	
-	function Validation() {
-	  var service = {
-		getClasses: getClasses
-	  };
+	function create(opts) {
+	  var _this = this;
 	  
-	  return service;
+	  var instance = _.cloneDeep(_this);
 	  
-	  function getClasses() {
-		return classes;
-	  }
+	  _.assign(instance, opts);
+	  
+	  _.bindAll(instance, _.functions(instance));
+    
+	  return instance;
 	}
   }
   
