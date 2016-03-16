@@ -8,6 +8,101 @@
 angular.module("rentler.core").run(["$templateCache", function($templateCache) {$templateCache.put("validation/directives/validateMsg/validateMsg.html","<div class=\"help-block\" ng-if=\"messages.length > 0\">\n  <div ng-repeat=\"message in messages | limitTo:1\">{{message}}</div>\n</div>");}]);
 (function () {
   'use strict';
+
+  angular
+    .module('rentler.core')
+	  .directive('rValidateMsg', ValidateMsgDirective);
+
+  ValidateMsgDirective.$inject = [];
+
+  function ValidateMsgDirective() {
+    var directive = {
+      restrict: 'A',
+      require: ['^form', '^rValidator', '?^ngRepeat'],
+      scope: true,
+      link: link,
+      replace: true,
+      templateUrl: 'validation/directives/validateMsg/validateMsg.html'
+    };
+
+    return directive;
+
+    function link(scope, element, attrs, ctrls) {
+      // Get controllers
+      var formCtrl = ctrls[0],
+          rValidatorCtrl = ctrls[1],
+          ngRepeatCtrl = ctrls[2];
+
+      // Get validator
+      var validator = _.get(rValidatorCtrl, 'validator');
+      
+      var ngRepeat = ngRepeatCtrl;
+      
+      // Find field name
+      var fieldName = '';
+
+      // Find field name in ngRepeat
+      while (!_.isEmpty(ngRepeat)) {
+        var index = ngRepeat.index,
+            itemName = ngRepeat.itemName,
+            collectionName = ngRepeat.collectionName,
+            name = name || attrs.rValidateMsg,
+            nameParts = name.split('.'),
+            tempFieldName = '';
+        
+        if (itemName === _.first(nameParts)) {
+          tempFieldName = collectionName;
+          
+          tempFieldName += '[' + index + ']';
+          
+          if (nameParts.length > 1) {
+            tempFieldName += '.' + _.tail(nameParts).join('.');
+          }
+          if (ngRepeat.ngRepeat) {
+            tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
+          }
+          
+          name = _.first(collectionName.split('.'));
+        }
+        
+        fieldName = tempFieldName + '.' + fieldName;
+        fieldName = _.trim(fieldName, '.');
+        
+        ngRepeat = ngRepeat.ngRepeat;
+      }
+      
+      fieldName = fieldName || attrs.rValidateMsg;
+      
+      // Remove model prefix from field name
+      var i = 0, parts = fieldName.split('.'), modelPath = '';
+      do {
+        modelPath = modelPath + '.' + parts[i];
+        modelPath = _.trim(modelPath, '.');
+        
+        if (_.result(scope, modelPath) === validator.model)
+          break;
+          
+        i++;
+      } while (i <= parts.length);
+
+      fieldName = _.replace(fieldName, modelPath, '');
+      fieldName = _.trim(fieldName, '.');
+
+      rValidatorCtrl.listeners.push(listener);
+      
+      function listener() {
+        // Not submitted no validation
+        if (!formCtrl.$submitted) return;
+        
+        // Add approriate classes
+        scope.messages = _.has(validator.errors, fieldName) ? validator.errors[fieldName] : [];
+      }
+    }
+  }
+
+})();
+(function () {
+  'use strict';
   
   angular
     .module('rentler.core')
@@ -61,19 +156,16 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   'use strict';
 
   angular
-    .module('rentler.core')
-	  .directive('rValidateMsg', ValidateMsgDirective);
+  	.module('rentler.core')
+	  .directive('rValidateClass', ValidateClassDirective);
 
-  ValidateMsgDirective.$inject = [];
+  ValidateClassDirective.$inject = ['Validation'];
 
-  function ValidateMsgDirective() {
+  function ValidateClassDirective(Validation) {
     var directive = {
       restrict: 'A',
       require: ['^form', '^rValidator', '?^ngRepeat'],
-      scope: true,
-      link: link,
-      replace: true,
-      templateUrl: 'validation/directives/validateMsg/validateMsg.html'
+      link: link
     };
 
     return directive;
@@ -83,7 +175,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       var formCtrl = ctrls[0],
           rValidatorCtrl = ctrls[1],
           ngRepeatCtrl = ctrls[2];
-
+      
       // Get validator
       var validator = _.get(rValidatorCtrl, 'validator');
       
@@ -92,43 +184,37 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       // Find field name
       var fieldName = '';
 
-      if (_.isEmpty(ngRepeat) || ngRepeat.itemName !== _.first(attrs.rValidateMsg.split('.'))) {
-        fieldName = attrs.rValidateMsg;
-      }
-      else {
-        // Find field name in ngRepeat
-        while (!_.isEmpty(ngRepeat)) {
-          var index = ngRepeat.index,
-              itemName = ngRepeat.itemName,
-              collectionName = ngRepeat.collectionName,
-              name = name || attrs.rValidateMsg,
-              nameParts = name.split('.'),
-              tempFieldName = '';
+      // Find field name in ngRepeat
+      while (!_.isEmpty(ngRepeat)) {
+        var index = ngRepeat.index,
+            itemName = ngRepeat.itemName,
+            collectionName = ngRepeat.collectionName,
+            name = name || attrs.rValidateClass,
+            nameParts = name.split('.'),
+            tempFieldName = '';
+        
+        if (itemName === _.first(nameParts)) {
+          tempFieldName = collectionName;
           
-          if (name.indexOf(itemName) > -1) {
-            tempFieldName = collectionName;
+          tempFieldName += '[' + index + ']';
+          
+          if (nameParts.length > 1) {
+            tempFieldName += '.' + _.tail(nameParts).join('.');
+          }
+          if (ngRepeat.ngRepeat) {
+            tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
           }
           
-          if (itemName === _.first(nameParts)) {
-            
-            tempFieldName += '[' + index + ']';
-            
-            if (nameParts.length > 1) {
-              tempFieldName += '.' + _.tail(nameParts).join('.');
-            }
-            if (ngRepeat.ngRepeat) {
-              tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
-            }
-            
-            name = _.first(collectionName.split('.'));
-          }
-          
-          fieldName = tempFieldName + '.' + fieldName;
-          fieldName = _.trim(fieldName, '.');
-          
-          ngRepeat = ngRepeat.ngRepeat;
+          name = _.first(collectionName.split('.'));
         }
+        
+        fieldName = tempFieldName + '.' + fieldName;
+        fieldName = _.trim(fieldName, '.');
+        
+        ngRepeat = ngRepeat.ngRepeat;
       }
+      
+      fieldName = fieldName || attrs.rValidateClass;
       
       // Remove model prefix from field name
       var i = 0, parts = fieldName.split('.'), modelPath = '';
@@ -145,19 +231,25 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       fieldName = _.replace(fieldName, modelPath, '');
       fieldName = _.trim(fieldName, '.');
 
+      // TODO: Check if field is in schema
+      
       rValidatorCtrl.listeners.push(listener);
       
       function listener() {
         // Not submitted no validation
-        if (!formCtrl.$submitted) return;
+        if (!formCtrl.$submitted || !_.has(validator.errors, fieldName)) return;
+        
+        // Get errors length
+        var length = validator.errors[fieldName].length;
         
         // Add approriate classes
-        scope.messages = _.has(validator.errors, fieldName) ? validator.errors[fieldName] : [];
+        if (length === 0) element.removeClass(Validation.getClasses().error).addClass(Validation.getClasses().success);
+        else if (length > 0) element.addClass(Validation.getClasses().error).removeClass(Validation.getClasses().success);
       }
     }
   }
 
-})();
+}());
 (function () {
   'use strict';
   
@@ -207,110 +299,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   'use strict';
 
   angular
-  	.module('rentler.core')
-	  .directive('rValidateClass', ValidateClassDirective);
-
-  ValidateClassDirective.$inject = ['Validation'];
-
-  function ValidateClassDirective(Validation) {
-    var directive = {
-      restrict: 'A',
-      require: ['^form', '^rValidator', '?^ngRepeat'],
-      link: link
-    };
-
-    return directive;
-
-    function link(scope, element, attrs, ctrls) {
-      // Get controllers
-      var formCtrl = ctrls[0],
-          rValidatorCtrl = ctrls[1],
-          ngRepeatCtrl = ctrls[2];
-      
-      // Get validator
-      var validator = _.get(rValidatorCtrl, 'validator');
-      
-      var ngRepeat = ngRepeatCtrl;
-      
-      // Find field name
-      var fieldName = '';
-
-      if (_.isEmpty(ngRepeat) || ngRepeat.itemName !== _.first(attrs.rValidateClass.split('.'))) {
-        fieldName = attrs.rValidateClass;
-      }
-      else {
-        // Find field name in ngRepeat
-        while (!_.isEmpty(ngRepeat)) {
-          var index = ngRepeat.index,
-              itemName = ngRepeat.itemName,
-              collectionName = ngRepeat.collectionName,
-              name = name || attrs.rValidateClass,
-              nameParts = name.split('.'),
-              tempFieldName = '';
-          
-          if (name.indexOf(itemName) > -1) {
-            tempFieldName = collectionName;
-          }
-          
-          if (itemName === _.first(nameParts)) {
-            
-            tempFieldName += '[' + index + ']';
-            
-            if (nameParts.length > 1) {
-              tempFieldName += '.' + _.tail(nameParts).join('.');
-            }
-            if (ngRepeat.ngRepeat) {
-              tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
-            }
-            
-            name = _.first(collectionName.split('.'));
-          }
-          
-          fieldName = tempFieldName + '.' + fieldName;
-          fieldName = _.trim(fieldName, '.');
-          
-          ngRepeat = ngRepeat.ngRepeat;
-        }
-      }
-      
-      // Remove model prefix from field name
-      var i = 0, parts = fieldName.split('.'), modelPath = '';
-      do {
-        modelPath = modelPath + '.' + parts[i];
-        modelPath = _.trim(modelPath, '.');
-        
-        if (_.result(scope, modelPath) === validator.model)
-          break;
-          
-        i++;
-      } while (i <= parts.length);
-
-      fieldName = _.replace(fieldName, modelPath, '');
-      fieldName = _.trim(fieldName, '.');
-
-      // TODO: Check if field is in schema
-      
-      rValidatorCtrl.listeners.push(listener);
-      
-      function listener() {
-        // Not submitted no validation
-        if (!formCtrl.$submitted || !_.has(validator.errors, fieldName)) return;
-        
-        // Get errors length
-        var length = validator.errors[fieldName].length;
-        
-        // Add approriate classes
-        if (length === 0) element.removeClass(Validation.getClasses().error).addClass(Validation.getClasses().success);
-        else if (length > 0) element.addClass(Validation.getClasses().error).removeClass(Validation.getClasses().success);
-      }
-    }
-  }
-
-}());
-(function () {
-  'use strict';
-
-  angular
     .module('rentler.core')
     .directive('ngModel', Directive);
 
@@ -342,43 +330,37 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       // Find field name
       var fieldName = '';
 
-      if (_.isEmpty(ngRepeat) || ngRepeat.itemName !== _.first(attrs.ngModel.split('.'))) {
-        fieldName = attrs.ngModel;
-      }
-      else {
-        // Find field name in ngRepeat
-        while (!_.isEmpty(ngRepeat)) {
-          var index = ngRepeat.index,
-              itemName = ngRepeat.itemName,
-              collectionName = ngRepeat.collectionName,
-              name = name || attrs.ngModel,
-              nameParts = name.split('.'),
-              tempFieldName = '';
+      // Find field name in ngRepeat
+      while (!_.isEmpty(ngRepeat)) {
+        var index = ngRepeat.index,
+            itemName = ngRepeat.itemName,
+            collectionName = ngRepeat.collectionName,
+            name = name || attrs.ngModel,
+            nameParts = name.split('.'),
+            tempFieldName = '';
+        
+        if (itemName === _.first(nameParts)) {
+          tempFieldName = collectionName;
           
-          if (name.indexOf(itemName) > -1) {
-            tempFieldName = collectionName;
+          tempFieldName += '[' + index + ']';
+          
+          if (nameParts.length > 1) {
+            tempFieldName += '.' + _.tail(nameParts).join('.');
+          }
+          if (ngRepeat.ngRepeat) {
+            tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
           }
           
-          if (itemName === _.first(nameParts)) {
-            
-            tempFieldName += '[' + index + ']';
-            
-            if (nameParts.length > 1) {
-              tempFieldName += '.' + _.tail(nameParts).join('.');
-            }
-            if (ngRepeat.ngRepeat) {
-              tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
-            }
-            
-            name = _.first(collectionName.split('.'));
-          }
-          
-          fieldName = tempFieldName + '.' + fieldName;
-          fieldName = _.trim(fieldName, '.');
-          
-          ngRepeat = ngRepeat.ngRepeat;
+          name = _.first(collectionName.split('.'));
         }
+        
+        fieldName = tempFieldName + '.' + fieldName;
+        fieldName = _.trim(fieldName, '.');
+        
+        ngRepeat = ngRepeat.ngRepeat;
       }
+      
+      fieldName = fieldName || attrs.ngModel;
       
       // Remove model prefix from field name
       var i = 0, parts = fieldName.split('.'), modelPath = '';
