@@ -8,63 +8,6 @@
 angular.module("rentler.core").run(["$templateCache", function($templateCache) {$templateCache.put("validation/directives/validateMsg/validateMsg.html","<div class=\"help-block\" ng-if=\"messages.length > 0\">\n  <div ng-repeat=\"message in messages | limitTo:1\">{{message}}</div>\n</div>");}]);
 (function () {
   'use strict';
-  
-  angular
-    .module('rentler.core')
-    .directive('rValidator', Directive);
-    
-  Directive.$inject = [];
-  
-  function Directive() {
-    var directive = {
-      restrict: 'EA',
-      require: 'form',
-      scope: {
-        rValidator: '='
-      },
-      controller: Ctrl
-    };
-    
-    return directive;
-  }
-  
-  Ctrl.$inject = ['$scope', '$element', '$attrs', '$timeout'];
-  
-  function Ctrl($scope, $element, $attrs, $timeout) {
-    var vm = this;
-    
-    vm.attr = $attrs.rValidator;
-    vm.validator = $scope.rValidator;
-    vm.listeners = [];
-    
-    // TODO: More Checks
-    if (!_.has($scope.rValidator, 'validate') &&
-        !_.isFunction($scope.rValidator.validate))
-      throw 'Invalid Validator.';
-    
-    // Watch for model changes and validate
-    $scope.$watch('rValidator.model', validate, true);
-    
-    // Watch for form submits and validte
-    var formCtrl = $element.controller('form');
-    $scope.$watch(function () { return formCtrl.$submitted; }, validate);
-    
-    function validate() {
-      $timeout(function () {
-        // Validate
-        vm.validator.validate();
-        
-        // Fire listeners
-        _.forEach(vm.listeners, function (listener) {
-          listener();
-        });
-      });
-    }
-  }
-    
-})();
-(function () {
-  'use strict';
 
   angular
     .module('rentler.core')
@@ -157,6 +100,63 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     }
   }
 
+})();
+(function () {
+  'use strict';
+  
+  angular
+    .module('rentler.core')
+    .directive('rValidator', Directive);
+    
+  Directive.$inject = [];
+  
+  function Directive() {
+    var directive = {
+      restrict: 'EA',
+      require: 'form',
+      scope: {
+        rValidator: '='
+      },
+      controller: Ctrl
+    };
+    
+    return directive;
+  }
+  
+  Ctrl.$inject = ['$scope', '$element', '$attrs', '$timeout'];
+  
+  function Ctrl($scope, $element, $attrs, $timeout) {
+    var vm = this;
+    
+    vm.attr = $attrs.rValidator;
+    vm.validator = $scope.rValidator;
+    vm.listeners = [];
+    
+    // TODO: More Checks
+    if (!_.has($scope.rValidator, 'validate') &&
+        !_.isFunction($scope.rValidator.validate))
+      throw 'Invalid Validator.';
+    
+    // Watch for model changes and validate
+    $scope.$watch('rValidator.model', validate, true);
+    
+    // Watch for form submits and validte
+    var formCtrl = $element.controller('form');
+    $scope.$watch(function () { return formCtrl.$submitted; }, validate);
+    
+    function validate() {
+      $timeout(function () {
+        // Validate
+        vm.validator.validate();
+        
+        // Fire listeners
+        _.forEach(vm.listeners, function (listener) {
+          listener();
+        });
+      });
+    }
+  }
+    
 })();
 (function () {
   'use strict';
@@ -256,51 +256,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
 
 }());
-(function () {
-  'use strict';
-  
-  angular
-    .module('rentler.core')
-    .directive('ngRepeat', Directive);
-  
-  Directive.$inject = [];
-  
-  function Directive() {
-    var directive = {
-      restrict: 'EA',
-      controller: controller
-    };
-    
-    return directive;
-  }
-  
-  controller.$inject = ['$scope', '$element', '$attrs'];
-  
-  function controller($scope, $element, $attrs) {
-    var _this = this;
-    
-    _this.index = $scope.$index;
-    _this.collectionName = null;
-    _this.itemName = null;
-    _this.ngRepeat = $element.parent().controller('ngRepeat');
-    
-    function init() {
-      // Deconstruct expression
-      var exp = $attrs.ngRepeat;
-      var match = exp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
-      
-      // Get collection name
-      _this.collectionName = match[2];
-      
-      // Get item name
-      match = match[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
-      _this.itemName = match[3] || match[1];
-    }
-    
-    init();
-  }
-  
-})();
 (function () {
   'use strict';
 
@@ -404,6 +359,51 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   'use strict';
   
   angular
+    .module('rentler.core')
+    .directive('ngRepeat', Directive);
+  
+  Directive.$inject = [];
+  
+  function Directive() {
+    var directive = {
+      restrict: 'EA',
+      controller: controller
+    };
+    
+    return directive;
+  }
+  
+  controller.$inject = ['$scope', '$element', '$attrs'];
+  
+  function controller($scope, $element, $attrs) {
+    var _this = this;
+    
+    _this.index = $scope.$index;
+    _this.collectionName = null;
+    _this.itemName = null;
+    _this.ngRepeat = $element.parent().controller('ngRepeat');
+    
+    function init() {
+      // Deconstruct expression
+      var exp = $attrs.ngRepeat;
+      var match = exp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
+      
+      // Get collection name
+      _this.collectionName = match[2];
+      
+      // Get item name
+      match = match[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
+      _this.itemName = match[3] || match[1];
+    }
+    
+    init();
+  }
+  
+})();
+(function () {
+  'use strict';
+  
+  angular
   	.module('rentler.core')
 	.directive('ngForm', FormDirective);
 	
@@ -464,6 +464,36 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
   
 })();
+(function () {
+  'use strict';
+  
+  angular
+  	.module('rentler.core')
+	.factory('Instantiable', InstantiableFactory);
+	
+  InstantiableFactory.$inject = [];
+  
+  function InstantiableFactory() {
+	var mixin = {
+	  create: create
+	};
+	
+	return mixin;
+	
+	function create(opts) {
+	  var _this = this;
+	  
+	  var instance = _.cloneDeep(_this);
+	  
+	  _.assign(instance, opts);
+	  
+	  _.bindAll(instance, _.functions(instance));
+    
+	  return instance;
+	}
+  }
+  
+}());
 (function () {
   'use strict';
   
@@ -836,8 +866,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
         schema: schema,
         model: model,
         errors: {},
-        isValid: true,
-        timestamp: 0
+        isValid: true
       };
       
       return validator;
@@ -911,15 +940,15 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
                           .flatten()
                           .value()
                           .length === 0;
+                          
+        if (!fields) return _this.isValid;
         
         var isValid = _(_this.errors)
-                        .pick(fields || _.keys(schema))
+                        .pick(fields)
                         .values()
                         .flatten()
                         .value()
                         .length === 0;
-                        
-        _this.timestamp = _.now();
 
         return isValid;
       }
@@ -968,36 +997,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
 
 } ());
-(function () {
-  'use strict';
-  
-  angular
-  	.module('rentler.core')
-	.factory('Instantiable', InstantiableFactory);
-	
-  InstantiableFactory.$inject = [];
-  
-  function InstantiableFactory() {
-	var mixin = {
-	  create: create
-	};
-	
-	return mixin;
-	
-	function create(opts) {
-	  var _this = this;
-	  
-	  var instance = _.cloneDeep(_this);
-	  
-	  _.assign(instance, opts);
-	  
-	  _.bindAll(instance, _.functions(instance));
-    
-	  return instance;
-	}
-  }
-  
-}());
 (function () {
   'use strict';
 
