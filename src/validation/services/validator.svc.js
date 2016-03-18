@@ -20,8 +20,7 @@
         schema: schema,
         model: model,
         errors: {},
-        isValid: true,
-        timestamp: 0
+        isValid: true
       };
       
       return validator;
@@ -95,15 +94,15 @@
                           .flatten()
                           .value()
                           .length === 0;
+                          
+        if (!fields) return _this.isValid;
         
         var isValid = _(_this.errors)
-                        .pick(fields || _.keys(schema))
+                        .pick(fields)
                         .values()
                         .flatten()
                         .value()
                         .length === 0;
-                        
-        _this.timestamp = _.now();
 
         return isValid;
       }

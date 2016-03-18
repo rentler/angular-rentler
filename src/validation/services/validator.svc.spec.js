@@ -52,7 +52,6 @@
     it('should validate', function () {
       expect(modelValidator.validate()).toBe(false);
       expect(modelValidator.isValid).toBe(false);
-      expect(modelValidator.timestamp).not.toBeUndefined();
     });
     
     it('should validate all fields when passed empty args', function () {
