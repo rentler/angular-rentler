@@ -8,6 +8,63 @@
 angular.module("rentler.core").run(["$templateCache", function($templateCache) {$templateCache.put("validation/directives/validateMsg/validateMsg.html","<div class=\"help-block\" ng-if=\"messages.length > 0\">\n  <div ng-repeat=\"message in messages | limitTo:1\">{{message}}</div>\n</div>");}]);
 (function () {
   'use strict';
+  
+  angular
+    .module('rentler.core')
+    .directive('rValidator', Directive);
+    
+  Directive.$inject = [];
+  
+  function Directive() {
+    var directive = {
+      restrict: 'EA',
+      require: 'form',
+      scope: {
+        rValidator: '='
+      },
+      controller: Ctrl
+    };
+    
+    return directive;
+  }
+  
+  Ctrl.$inject = ['$scope', '$element', '$attrs', '$timeout'];
+  
+  function Ctrl($scope, $element, $attrs, $timeout) {
+    var vm = this;
+    
+    vm.attr = $attrs.rValidator;
+    vm.validator = $scope.rValidator;
+    vm.listeners = [];
+    
+    // TODO: More Checks
+    if (!_.has($scope.rValidator, 'validate') &&
+        !_.isFunction($scope.rValidator.validate))
+      throw 'Invalid Validator.';
+    
+    // Watch for model changes and validate
+    $scope.$watch('rValidator.model', validate, true);
+    
+    // Watch for form submits and validte
+    var formCtrl = $element.controller('form');
+    $scope.$watch(function () { return formCtrl.$submitted; }, validate);
+    
+    function validate() {
+      $timeout(function () {
+        // Validate
+        vm.validator.validate();
+        
+        // Fire listeners
+        _.forEach(vm.listeners, function (listener) {
+          listener();
+        });
+      });
+    }
+  }
+    
+})();
+(function () {
+  'use strict';
 
   angular
     .module('rentler.core')
@@ -100,57 +157,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     }
   }
 
-})();
-(function () {
-  'use strict';
-  
-  angular
-    .module('rentler.core')
-    .directive('rValidator', Directive);
-    
-  Directive.$inject = [];
-  
-  function Directive() {
-    var directive = {
-      restrict: 'EA',
-      scope: {
-        rValidator: '='
-      },
-      controller: Ctrl
-    };
-    
-    return directive;
-  }
-  
-  Ctrl.$inject = ['$scope', '$attrs', '$timeout'];
-  
-  function Ctrl($scope, $attrs, $timeout) {
-    var vm = this;
-    
-    vm.attr = $attrs.rValidator;
-    vm.validator = $scope.rValidator;
-    vm.listeners = [];
-    
-    // TODO: More Checks
-    if (!_.has($scope.rValidator, 'validate') &&
-        !_.isFunction($scope.rValidator.validate))
-      throw 'Invalid Validator.';
-    
-    // Watch for model changes
-    $scope.$watch('rValidator', function () {
-      $timeout(function () {
-        // Validate
-        vm.validator.validate();
-        
-        // Fire listeners
-        _.forEach(vm.listeners, function (listener) {
-          listener();
-        });
-      });
-
-    }, true);
-  }
-    
 })();
 (function () {
   'use strict';

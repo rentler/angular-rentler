@@ -10,6 +10,7 @@
   function Directive() {
     var directive = {
       restrict: 'EA',
+      require: 'form',
       scope: {
         rValidator: '='
       },
@@ -19,9 +20,9 @@
     return directive;
   }
   
-  Ctrl.$inject = ['$scope', '$attrs', '$timeout'];
+  Ctrl.$inject = ['$scope', '$element', '$attrs', '$timeout'];
   
-  function Ctrl($scope, $attrs, $timeout) {
+  function Ctrl($scope, $element, $attrs, $timeout) {
     var vm = this;
     
     vm.attr = $attrs.rValidator;
@@ -33,8 +34,14 @@
         !_.isFunction($scope.rValidator.validate))
       throw 'Invalid Validator.';
     
-    // Watch for model changes
-    $scope.$watch('rValidator', function () {
+    // Watch for model changes and validate
+    $scope.$watch('rValidator.model', validate, true);
+    
+    // Watch for form submits and validte
+    var formCtrl = $element.controller('form');
+    $scope.$watch(function () { return formCtrl.$submitted; }, validate);
+    
+    function validate() {
       $timeout(function () {
         // Validate
         vm.validator.validate();
@@ -44,8 +51,7 @@
           listener();
         });
       });
-
-    }, true);
+    }
   }
     
 })();
