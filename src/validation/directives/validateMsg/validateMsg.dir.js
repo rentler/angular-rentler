@@ -79,6 +79,9 @@
 
       fieldName = _.replace(fieldName, modelPath, '');
       fieldName = _.trim(fieldName, '.');
+      
+      // Not in schema
+      if (!_.has(validator.schema, fieldName)) return;
 
       rValidatorCtrl.listeners.push(listener);
       
