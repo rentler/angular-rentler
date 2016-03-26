@@ -65,13 +65,19 @@
       
       fieldName = fieldName || attrs.rValidateMsg;
       
+      // Find base scope
+      var baseScope = scope;
+      while (baseScope.$$transcluded) {
+        baseScope = baseScope.$parent;
+      }
+      
       // Remove model prefix from field name
       var i = 0, parts = fieldName.split('.'), modelPath = '';
       do {
         modelPath = modelPath + '.' + parts[i];
         modelPath = _.trim(modelPath, '.');
         
-        if (_.result(scope, modelPath) === validator.model)
+        if (_.result(baseScope, modelPath) === validator.model)
           break;
           
         i++;
@@ -81,7 +87,8 @@
       fieldName = _.trim(fieldName, '.');
       
       // Not in schema
-      if (!_.has(validator.schema, fieldName)) return;
+      var schemaFieldName = fieldName.replace(/\[\d+\]/g, '.collection');
+      if (!_.has(validator.schema, schemaFieldName)) return;
 
       rValidatorCtrl.listeners.push(listener);
       
