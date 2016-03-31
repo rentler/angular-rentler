@@ -14,11 +14,12 @@
     
     return service;
     
-    function create(schema, model) {
+    function create(schema, model, scope) {
       var validator = {
         validate: validate,
         schema: schema,
         model: model,
+        scope: scope,
         errors: {},
         isValid: true
       };

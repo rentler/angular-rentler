@@ -43,13 +43,11 @@
           { name: 'thrid' }
         ]
       };
-      
-      validator = Validator.create(schema, model);
     });
     
     beforeEach(function () {
       $scope.vm = {};
-      $scope.vm.validator = validator;
+      $scope.vm.validator = validator = Validator.create(schema, model, $scope.vm);
       $scope.vm.model = model;
       
       formElem = angular.element('<form r-validator="vm.validator"><div r-validate-class="vm.model.firstName"></div></form>');

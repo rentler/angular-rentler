@@ -65,25 +65,10 @@
       
       fieldName = fieldName || attrs.ngModel;
       
-      // Find base scope
-      var baseScope = scope;
-      while (baseScope.$$transcluded) {
-        baseScope = baseScope.$parent;
-      }
-      
-      // Remove model prefix from field name
-      var i = 0, parts = fieldName.split('.'), modelPath = '';
-      do {
-        modelPath = modelPath + '.' + parts[i];
-        modelPath = _.trim(modelPath, '.');
-        
-        if (_.result(baseScope, modelPath) === validator.model)
-          break;
-          
-        i++;
-      } while (i <= parts.length);
-
-      fieldName = _.replace(fieldName, modelPath, '');
+      // Remove model path from fieldName
+      var modelPath = _.findKey(validator.scope, validator.model);
+      var modelPathIndex = fieldName.indexOf(modelPath);
+      fieldName = _.drop(fieldName, modelPathIndex + modelPath.length).join('');
       fieldName = _.trim(fieldName, '.');
 
       // Not in schema

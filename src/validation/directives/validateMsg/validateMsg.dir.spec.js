@@ -39,14 +39,12 @@
           { name: 'thrid' }
         ]
       };
-      
-      validator = Validator.create(schema, model);
     });
 	
 	beforeEach(function () {
     $scope.vm = {};
 	  $scope.vm.model = model;
-    $scope.vm.validator = validator;
+    $scope.vm.validator = validator = Validator.create(schema, model, $scope.vm);
 	  
 	  formElem = angular.element('<form r-validator="vm.validator"><div r-validate-msg="vm.model.firstName"></div></form>');
 	  var repeatElem = angular.element('<div ng-repeat="friend in vm.model.friends"><div r-validate-msg="friend.firstName"></div></div>');
