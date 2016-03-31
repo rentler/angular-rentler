@@ -131,7 +131,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       fieldName = fieldName || attrs.rValidateMsg;
       
       // Remove model path from fieldName
-      var modelPath = _.findKey(validator.scope, validator.model);
+      var modelPath = _.findKey(validator.scope, function (o) { return o === validator.model; });
       var modelPathIndex = fieldName.indexOf(modelPath);
       fieldName = _.drop(fieldName, modelPathIndex + modelPath.length).join('');
       fieldName = _.trim(fieldName, '.');
@@ -152,6 +152,51 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     }
   }
 
+})();
+(function () {
+  'use strict';
+  
+  angular
+    .module('rentler.core')
+    .directive('ngRepeat', Directive);
+  
+  Directive.$inject = [];
+  
+  function Directive() {
+    var directive = {
+      restrict: 'EA',
+      controller: controller
+    };
+    
+    return directive;
+  }
+  
+  controller.$inject = ['$scope', '$element', '$attrs'];
+  
+  function controller($scope, $element, $attrs) {
+    var _this = this;
+    
+    _this.index = $scope.$index;
+    _this.collectionName = null;
+    _this.itemName = null;
+    _this.ngRepeat = $element.parent().controller('ngRepeat');
+    
+    function init() {
+      // Deconstruct expression
+      var exp = $attrs.ngRepeat;
+      var match = exp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
+      
+      // Get collection name
+      _this.collectionName = match[2];
+      
+      // Get item name
+      match = match[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
+      _this.itemName = match[3] || match[1];
+    }
+    
+    init();
+  }
+  
 })();
 (function () {
   'use strict';
@@ -218,7 +263,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       fieldName = fieldName || attrs.rValidateClass;
       
       // Remove model path from fieldName
-      var modelPath = _.findKey(validator.scope, validator.model);
+      var modelPath = _.findKey(validator.scope, function (o) { return o === validator.model; });
       var modelPathIndex = fieldName.indexOf(modelPath);
       fieldName = _.drop(fieldName, modelPathIndex + modelPath.length).join('');
       fieldName = _.trim(fieldName, '.');
@@ -244,51 +289,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
 
 }());
-(function () {
-  'use strict';
-  
-  angular
-    .module('rentler.core')
-    .directive('ngRepeat', Directive);
-  
-  Directive.$inject = [];
-  
-  function Directive() {
-    var directive = {
-      restrict: 'EA',
-      controller: controller
-    };
-    
-    return directive;
-  }
-  
-  controller.$inject = ['$scope', '$element', '$attrs'];
-  
-  function controller($scope, $element, $attrs) {
-    var _this = this;
-    
-    _this.index = $scope.$index;
-    _this.collectionName = null;
-    _this.itemName = null;
-    _this.ngRepeat = $element.parent().controller('ngRepeat');
-    
-    function init() {
-      // Deconstruct expression
-      var exp = $attrs.ngRepeat;
-      var match = exp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
-      
-      // Get collection name
-      _this.collectionName = match[2];
-      
-      // Get item name
-      match = match[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
-      _this.itemName = match[3] || match[1];
-    }
-    
-    init();
-  }
-  
-})();
 (function () {
   'use strict';
 
@@ -357,7 +357,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       fieldName = fieldName || attrs.ngModel;
       
       // Remove model path from fieldName
-      var modelPath = _.findKey(validator.scope, validator.model);
+      var modelPath = _.findKey(validator.scope, function (o) { return o === validator.model; });
       var modelPathIndex = fieldName.indexOf(modelPath);
       fieldName = _.drop(fieldName, modelPathIndex + modelPath.length).join('');
       fieldName = _.trim(fieldName, '.');

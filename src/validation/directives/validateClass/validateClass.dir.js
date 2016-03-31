@@ -63,7 +63,7 @@
       fieldName = fieldName || attrs.rValidateClass;
       
       // Remove model path from fieldName
-      var modelPath = _.findKey(validator.scope, validator.model);
+      var modelPath = _.findKey(validator.scope, function (o) { return o === validator.model; });
       var modelPathIndex = fieldName.indexOf(modelPath);
       fieldName = _.drop(fieldName, modelPathIndex + modelPath.length).join('');
       fieldName = _.trim(fieldName, '.');
