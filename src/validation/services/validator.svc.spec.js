@@ -73,14 +73,6 @@
       expect(modelValidator.errors.lastName).not.toBeUndefined();
     });
     
-    it('should incrementally add validation errors on consecutive validate calls', function () {
-      modelValidator.validate('firstName');
-      modelValidator.validate('lastName');
-      
-      expect(modelValidator.errors.firstName).not.toBeUndefined();
-      expect(modelValidator.errors.lastName).not.toBeUndefined();
-    });
-    
     it('should use custom error messages', function () {
       model.firstName = null;
       model.lastName = null;

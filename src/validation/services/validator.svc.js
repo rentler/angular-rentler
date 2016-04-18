@@ -29,6 +29,9 @@
       function validate(fields) {
         var _this = this;
         
+        // Reset errors
+        _this.errors = {};
+        
         _validate(schema);
         
         function _validate(schema) {
@@ -46,7 +49,7 @@
                 validators.validateIf(model) === false)
                 return;
                 
-            // Reset validation for field
+            // Initialize validation for field
             _this.errors[field] = [];
             
             // Iterate each validator
