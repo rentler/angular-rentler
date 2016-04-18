@@ -77,6 +77,11 @@
       
       // Add to validation listeners
       rValidatorCtrl.listeners.push(listener);
+      
+      // Cleanup
+      scope.$on('$destroy', function () {
+        _.pull(rValidatorCtrl.listeners, listener);
+      });
 
       function listener() {
         // Get the number of errors for the field

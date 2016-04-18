@@ -74,8 +74,14 @@
       // Not in schema
       var schemaFieldName = fieldName.replace(/\[\d+\]/g, '.collection');
       if (!_.has(validator.schema, schemaFieldName)) return;
-
+      
+      // Add Listener
       rValidatorCtrl.listeners.push(listener);
+      
+      // Cleanup
+      scope.$on('$destroy', function () {
+        _.pull(rValidatorCtrl.listeners, listener);
+      });
       
       function listener() {
         // Not submitted no validation

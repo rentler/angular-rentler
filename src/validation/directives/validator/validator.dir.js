@@ -45,7 +45,7 @@
       $timeout(function () {
         // Validate
         vm.validator.validate();
-        
+
         // Fire listeners
         _.forEach(vm.listeners, function (listener) {
           listener();
