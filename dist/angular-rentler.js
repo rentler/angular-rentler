@@ -303,6 +303,70 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 })();
 (function () {
   'use strict';
+  
+  angular
+  	.module('rentler.core')
+	.directive('ngForm', FormDirective);
+	
+  FormDirective.$inject = ['$parse'];
+  
+  function FormDirective($parse) {
+	  var directive = {
+      restrict: 'EA',
+      require: 'form',
+      link: link
+    };
+    
+    return directive;
+    
+    function link(scope, elem, attrs, ctrl) {
+      // Find submit button
+      var btns = [elem.find('button'), elem.find('input')];
+      
+      var submitBtn = _.find(btns, function (btn) {
+        for (var i = 0; i < btn.length; i++)
+          return btn[i].type.toLowerCase() === 'submit';
+      });
+      
+      // Submit button clicked
+      angular.element(submitBtn).bind('click', function (e) {
+        e.preventDefault();
+        
+        if (!attrs.ngSubmit || !_.isUndefined(angular.element(this).attr('ng-click')))
+          return;
+        
+        submit();
+        
+        return;
+      });
+      
+      // Enter key
+      elem.bind('keydown', function (e) {
+        var keyCode = e.keyCode || e.which;
+        
+        if (keyCode !== 13) return;
+        
+        if (attrs.ngSubmit) submit();
+        
+        if (submitBtn) submitBtn.click();
+      });
+      
+      // Submit handler
+      elem.on('submit', function () {
+        submit();
+      });
+      
+      // Submit
+      function submit() {
+        ctrl.$submitted = true;
+        $parse(attrs.ngSubmit)(scope);
+      }
+    }
+  }
+  
+})();
+(function () {
+  'use strict';
 
   angular
     .module('rentler.core')
@@ -403,90 +467,27 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   
   angular
   	.module('rentler.core')
-	.directive('ngForm', FormDirective);
+	.factory('RequiredIfValidator', Factory);
 	
-  FormDirective.$inject = ['$parse'];
+  Factory.$inject = ['RequiredValidator'];
   
-  function FormDirective($parse) {
-	  var directive = {
-      restrict: 'EA',
-      require: 'form',
-      link: link
+  function Factory(RequiredValidtor) {
+    var validator = {
+      validate: validate,
+      message: 'Required'
     };
     
-    return directive;
+    return validator;
     
-    function link(scope, elem, attrs, ctrl) {
-      // Find submit button
-      var btns = [elem.find('button'), elem.find('input')];
+    function validate(value, instance, opts) {
+      if (!opts) return true;
+        
+      var fn = _.isFunction(opts) ? opts : opts.requiredIf;
       
-      var submitBtn = _.find(btns, function (btn) {
-        for (var i = 0; i < btn.length; i++)
-          return btn[i].type.toLowerCase() === 'submit';
-      });
+      var required = fn(instance);
       
-      // Submit button clicked
-      angular.element(submitBtn).bind('click', function (e) {
-        e.preventDefault();
-        
-        if (!attrs.ngSubmit || !_.isUndefined(angular.element(this).attr('ng-click')))
-          return;
-        
-        submit();
-        
-        return;
-      });
-      
-      // Enter key
-      elem.bind('keydown', function (e) {
-        var keyCode = e.keyCode || e.which;
-        
-        if (keyCode !== 13) return;
-        
-        if (attrs.ngSubmit) submit();
-        
-        if (submitBtn) submitBtn.click();
-      });
-      
-      // Submit handler
-      elem.on('submit', function () {
-        submit();
-      });
-      
-      // Submit
-      function submit() {
-        ctrl.$submitted = true;
-        $parse(attrs.ngSubmit)(scope);
-      }
+      return RequiredValidtor.validate(value, instance, required);
     }
-  }
-  
-})();
-(function () {
-  'use strict';
-  
-  angular
-  	.module('rentler.core')
-	.factory('RequiredIfValidator', RequiredIfValidator);
-	
-  RequiredIfValidator.$inject = ['RequiredValidator'];
-  
-  function RequiredIfValidator(RequiredValidtor) {
-	function validate(value, instance, opts) {
-	  if (!opts || !_.isFunction(opts))
-	  	return true;
-	  
-	  var required = opts(instance);
-	  
-	  return RequiredValidtor.validate(value, instance, required);
-	}
-	
-	var requiredif = {
-	  message: 'Required',
-	  validate: validate
-	};
-	
-	return requiredif;
   }
 	
 })();
@@ -702,9 +703,11 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     return validator;
     
     function validate(value, instance, opts) {
-      if (!opts || !_.isFunction(opts)) return true;
+      if (!opts) return true;
       
-      var isValid = opts(instance);
+      var fn = _.isFunction(opts) ? opts : opts.fn;
+      
+      var isValid = fn(instance);
 
       return isValid;
     }
@@ -999,6 +1002,36 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 } ());
 (function () {
   'use strict';
+  
+  angular
+  	.module('rentler.core')
+	.factory('Instantiable', InstantiableFactory);
+	
+  InstantiableFactory.$inject = [];
+  
+  function InstantiableFactory() {
+	var mixin = {
+	  create: create
+	};
+	
+	return mixin;
+	
+	function create(opts) {
+	  var _this = this;
+	  
+	  var instance = _.cloneDeep(_this);
+	  
+	  _.assign(instance, opts);
+	  
+	  _.bindAll(instance, _.functions(instance));
+    
+	  return instance;
+	}
+  }
+  
+}());
+(function () {
+  'use strict';
 
   angular
     .module('rentler.core')
@@ -1203,34 +1236,4 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     }
   }
 
-}());
-(function () {
-  'use strict';
-  
-  angular
-  	.module('rentler.core')
-	.factory('Instantiable', InstantiableFactory);
-	
-  InstantiableFactory.$inject = [];
-  
-  function InstantiableFactory() {
-	var mixin = {
-	  create: create
-	};
-	
-	return mixin;
-	
-	function create(opts) {
-	  var _this = this;
-	  
-	  var instance = _.cloneDeep(_this);
-	  
-	  _.assign(instance, opts);
-	  
-	  _.bindAll(instance, _.functions(instance));
-    
-	  return instance;
-	}
-  }
-  
 }());
