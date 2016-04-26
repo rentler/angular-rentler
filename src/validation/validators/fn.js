@@ -16,9 +16,11 @@
     return validator;
     
     function validate(value, instance, opts) {
-      if (!opts || !_.isFunction(opts)) return true;
+      if (!opts) return true;
       
-      var isValid = opts(instance);
+      var fn = _.isFunction(opts) ? opts : opts.fn;
+      
+      var isValid = fn(instance);
 
       return isValid;
     }

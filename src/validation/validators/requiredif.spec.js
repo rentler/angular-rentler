@@ -30,10 +30,6 @@
 	  expect(RequiredIfValidator.validate(1, { hello: '' }, condition)).toBe(true);
 	});
 	
-	it('should not require the field if condition is not a function', function () {
-	  expect(RequiredIfValidator.validate(null, { hello: 'world' }, 1));
-	});
-	
   });
   
 })();

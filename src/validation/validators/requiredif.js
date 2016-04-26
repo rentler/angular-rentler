@@ -3,26 +3,27 @@
   
   angular
   	.module('rentler.core')
-	.factory('RequiredIfValidator', RequiredIfValidator);
+	.factory('RequiredIfValidator', Factory);
 	
-  RequiredIfValidator.$inject = ['RequiredValidator'];
+  Factory.$inject = ['RequiredValidator'];
   
-  function RequiredIfValidator(RequiredValidtor) {
-	function validate(value, instance, opts) {
-	  if (!opts || !_.isFunction(opts))
-	  	return true;
-	  
-	  var required = opts(instance);
-	  
-	  return RequiredValidtor.validate(value, instance, required);
-	}
-	
-	var requiredif = {
-	  message: 'Required',
-	  validate: validate
-	};
-	
-	return requiredif;
+  function Factory(RequiredValidtor) {
+    var validator = {
+      validate: validate,
+      message: 'Required'
+    };
+    
+    return validator;
+    
+    function validate(value, instance, opts) {
+      if (!opts) return true;
+        
+      var fn = _.isFunction(opts) ? opts : opts.requiredIf;
+      
+      var required = fn(instance);
+      
+      return RequiredValidtor.validate(value, instance, required);
+    }
   }
 	
 })();
