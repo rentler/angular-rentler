@@ -689,6 +689,34 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 
   angular
     .module('rentler.core')
+    .factory('FnValidator', Factory);
+
+  Factory.$inject = [];
+
+  function Factory() {
+    var validator = {
+      validate: validate,
+      message: 'Invalid'
+    };
+
+    return validator;
+    
+    function validate(value, instance, opts) {
+      if (!opts || !_.isFunction(opts)) return true;
+      
+      var isValid = opts(instance);
+
+      return isValid;
+    }
+  }
+
+})();
+
+(function () {
+  'use strict';
+
+  angular
+    .module('rentler.core')
     .factory('EqualsValidator', EqualsValidator);
 
   function EqualsValidator() {
@@ -971,36 +999,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 } ());
 (function () {
   'use strict';
-  
-  angular
-  	.module('rentler.core')
-	.factory('Instantiable', InstantiableFactory);
-	
-  InstantiableFactory.$inject = [];
-  
-  function InstantiableFactory() {
-	var mixin = {
-	  create: create
-	};
-	
-	return mixin;
-	
-	function create(opts) {
-	  var _this = this;
-	  
-	  var instance = _.cloneDeep(_this);
-	  
-	  _.assign(instance, opts);
-	  
-	  _.bindAll(instance, _.functions(instance));
-    
-	  return instance;
-	}
-  }
-  
-}());
-(function () {
-  'use strict';
 
   angular
     .module('rentler.core')
@@ -1205,4 +1203,34 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     }
   }
 
+}());
+(function () {
+  'use strict';
+  
+  angular
+  	.module('rentler.core')
+	.factory('Instantiable', InstantiableFactory);
+	
+  InstantiableFactory.$inject = [];
+  
+  function InstantiableFactory() {
+	var mixin = {
+	  create: create
+	};
+	
+	return mixin;
+	
+	function create(opts) {
+	  var _this = this;
+	  
+	  var instance = _.cloneDeep(_this);
+	  
+	  _.assign(instance, opts);
+	  
+	  _.bindAll(instance, _.functions(instance));
+    
+	  return instance;
+	}
+  }
+  
 }());
