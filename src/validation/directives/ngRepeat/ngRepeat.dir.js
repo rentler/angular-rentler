@@ -25,6 +25,7 @@
     _this.collectionName = null;
     _this.itemName = null;
     _this.ngRepeat = $element.parent().controller('ngRepeat');
+    _this.listeners = [];
     
     function init() {
       // Deconstruct expression
@@ -37,6 +38,16 @@
       // Get item name
       match = match[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
       _this.itemName = match[3] || match[1];
+      
+      // Watch for index changes
+      $scope.$watch('$index', function (newIndex) {
+        _this.index = newIndex;
+
+        // Fire listeners
+        _.forEach(_this.listeners, function (listener) {
+          listener();
+        });
+      });
     }
     
     init();

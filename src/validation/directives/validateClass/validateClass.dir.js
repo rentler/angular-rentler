@@ -21,64 +21,35 @@
       var formCtrl = ctrls[0],
           rValidatorCtrl = ctrls[1],
           ngRepeatCtrl = ctrls[2];
+          
+      // No validation
+      if (!rValidatorCtrl) return;
       
       // Get validator
       var validator = _.get(rValidatorCtrl, 'validator');
       
-      var ngRepeat = ngRepeatCtrl;
-      
-      // Find field name
+      // Initialize field name
       var fieldName = '';
-
-      // Find field name in ngRepeat
-      while (!_.isEmpty(ngRepeat)) {
-        var index = ngRepeat.index,
-            itemName = ngRepeat.itemName,
-            collectionName = ngRepeat.collectionName,
-            name = name || attrs.rValidateClass,
-            nameParts = name.split('.'),
-            tempFieldName = '';
-        
-        if (itemName === _.first(nameParts)) {
-          tempFieldName = collectionName;
-          
-          tempFieldName += '[' + index + ']';
-          
-          if (nameParts.length > 1) {
-            tempFieldName += '.' + _.tail(nameParts).join('.');
-          }
-          if (ngRepeat.ngRepeat) {
-            tempFieldName = _.trimStart(tempFieldName, ngRepeat.ngRepeat.itemName);
-          }
-          
-          name = _.first(collectionName.split('.'));
-        }
-        
-        fieldName = tempFieldName + '.' + fieldName;
-        fieldName = _.trim(fieldName, '.');
-        
-        ngRepeat = ngRepeat.ngRepeat;
+      var fieldNameOptions = {
+        attrFieldName: attrs.rValidateClass,
+        ngRepeatCtrl: ngRepeatCtrl,
+        validator: validator
+      };
+      assignFieldName();
+      
+      // Watch field name for collections
+      if (ngRepeatCtrl) ngRepeatCtrl.listeners.push(assignFieldName);
+      
+      function assignFieldName() {
+        fieldName = Validation.getFieldName(fieldNameOptions);
       }
-      
-      fieldName = fieldName || attrs.rValidateClass;
-      
-      // Remove model path from fieldName
-      var modelPath = _.findKey(validator.scope, function (o) { return o === validator.model; });
-      var modelPathIndex = fieldName.indexOf(modelPath);
-      fieldName = _.drop(fieldName, modelPathIndex + modelPath.length).join('');
-      fieldName = _.trim(fieldName, '.');
 
-      // Not in schema
+      // Verify field is in schema
       var schemaFieldName = fieldName.replace(/\[\d+\]/g, '.collection');
       if (!_.has(validator.schema, schemaFieldName)) return;
       
-      // Add listener
+      // Add to validation listeners
       rValidatorCtrl.listeners.push(listener);
-      
-      // Cleanup
-      scope.$on('$destroy', function () {
-        _.pull(rValidatorCtrl.listeners, listener);
-      });
       
       function listener() {
         // Not submitted no validation
@@ -91,7 +62,13 @@
         if (length === 0) element.removeClass(Validation.getClasses().error).addClass(Validation.getClasses().success);
         else if (length > 0) element.addClass(Validation.getClasses().error).removeClass(Validation.getClasses().success);
       }
+      
+      // Cleanup
+      scope.$on('$destroy', function () {
+        _.pull(rValidatorCtrl.listeners, listener);
+        if (ngRepeatCtrl) _.pull(ngRepeatCtrl.listeners, assignFieldName);
+      });
     }
   }
 
-}());
+})();
