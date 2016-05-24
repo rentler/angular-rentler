@@ -19,7 +19,7 @@
     }
 
     var numeric = {
-      message: 'Must Be a Number',
+      message: 'Must be a number',
       validate: validate
     };
 

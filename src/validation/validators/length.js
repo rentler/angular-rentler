@@ -22,12 +22,15 @@
     var length = {
       validate: validate,
       message: function (field, opts) {
-        if (_.isNumber(opts[0]) && !_.isNumber(opts[1]))
-          return 'Must Be At Least ' + opts[0] + ' Characters Long';
-        else if (!_.isNumber(opts[0]) && _.isNumber(opts[1]))
-          return 'Must Be Under ' + opts[1] + ' Characters Long';
+        var min = opts.length[0],
+            max = opts.length[1];
+          
+        if (_.isNumber(min) && !_.isNumber(max))
+          return 'Must be at least ' + min + ' characters long';
+        else if (!_.isNumber(min) && _.isNumber(max))
+          return 'Must be under ' + max + ' characters long';
         else
-          return 'Must Be ' + opts[0] + '–' + opts[1] + ' Characters Long';
+          return 'Must be ' + min + '–' + max + ' characters long';
       }
     };
 
