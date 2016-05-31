@@ -8,6 +8,13 @@
   CompareValidator.$inject = [];
 
   function CompareValidator() {
+    var validator = {
+      message: 'Must Match',
+      validate: validate
+    };
+
+    return validator;
+    
     function validate(value, instance, opts) {
       if (!opts)
         return true;
@@ -19,17 +26,6 @@
 
       return value === instance[compareField];
     }
-
-    function message(field, opts) {
-      return _.format('Must Match', opts);
-    }
-
-    var compare = {
-      message: message,
-      validate: validate
-    };
-
-    return compare;
   }
 
 })();

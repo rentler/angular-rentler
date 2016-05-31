@@ -440,19 +440,19 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   RequiredValidator.$inject = [];
 
   function RequiredValidator() {
+    var validator = {
+      message: 'Required',
+      validate: validate
+    };
+
+    return validator;
+    
     function validate(value, instance, opts) {
       if (!opts)
         return true;
 
       return !(_.isNull(value) || _.isUndefined(value) || (_.isString(value) && _.trim(value) === '') || (_.isArray(value) && _.isEmpty(value)));
     }
-
-    var required = {
-      message: 'Required',
-      validate: validate
-    };
-
-    return required;
   }
 
 })();
@@ -467,6 +467,13 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   RangeValidator.$inject = [];
 
   function RangeValidator() {
+    var validator = {
+      validate: validate,
+      message: message
+    };
+
+    return validator;
+    
     function validate(value, instance, opts) {
       if (!opts)
         return true;
@@ -486,13 +493,19 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 
       return _.isNumber(+value) && +value >= min && +value <= max;
     }
-
-    var range = {
-      validate: validate,
-      message: 'Invalid'
-    };
-
-    return range;
+    
+    function message(field, opts) {
+        var minmax = _.isArray(opts) ? opts : opts.range,
+            min = minmax[0],
+            max = minmax[1];
+          
+        if (_.isNumber(min) && !_.isNumber(max))
+          return 'Must be at least ' + min;
+        else if (!_.isNumber(min) && _.isNumber(max))
+          return 'Must be under ' + max;
+        else
+          return 'Must be ' + min + '–' + max;
+    }
   }
 
 })();
@@ -507,6 +520,13 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   PatternValidator.$inject = [];
 
   function PatternValidator() {
+    var validator = {
+      message: 'Invalid',
+      validate: validate
+    };
+
+    return validator;
+    
     function validate(value, instance, opts) {
       if (!opts)
         return true;
@@ -518,13 +538,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 
       return regexp.test(value);
     }
-
-    var pattern = {
-      message: 'Field is invalid.',
-      validate: validate
-    };
-
-    return pattern;
   }
 
 })();
@@ -539,6 +552,13 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   NumericValidator.$inject = [];
 
   function NumericValidator() {
+    var validator = {
+      message: 'Must be a number',
+      validate: validate
+    };
+
+    return validator;
+    
     function validate(value, instance, opts) {
       if (!opts)
         return true;
@@ -548,13 +568,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 
       return _.isString(value) && !_.isNaN(+value);
     }
-
-    var numeric = {
-      message: 'Must be a number',
-      validate: validate
-    };
-
-    return numeric;
   }
 
 })();
@@ -569,19 +582,19 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   MandatoryValidator.$inject = [];
 
   function MandatoryValidator() {
+    var validator = {
+      message: 'Must Agree to Continue',
+      validate: validate
+    };
+
+    return validator;
+    
     function validate(value, instance, opts) {
       if (!opts)
         return true;
 
       return _.isBoolean(value) && value === true;
     }
-
-    var mandatory = {
-      message: 'Must Agree to Continue',
-      validate: validate
-    };
-
-    return mandatory;
   }
 
 })();
@@ -596,6 +609,13 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   LengthValidator.$inject = [];
 
   function LengthValidator() {
+    var validator = {
+      validate: validate,
+      message: message
+    };
+
+    return validator;
+    
     function validate(value, instance, opts) {
       if (!opts || !value)
         return true;
@@ -606,12 +626,11 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 
       return (_.isString(value) || _.isArray(value)) && value.length >= min && value.length <= max;
     }
-
-    var length = {
-      validate: validate,
-      message: function (field, opts) {
-        var min = opts.length[0],
-            max = opts.length[1];
+    
+    function message(field, opts) {
+      var minmax = _.isArray(opts) ? opts : opts.length,
+          min = minmax[0],
+          max = minmax[1];
           
         if (_.isNumber(min) && !_.isNumber(max))
           return 'Must be at least ' + min + ' characters long';
@@ -619,10 +638,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
           return 'Must be under ' + max + ' characters long';
         else
           return 'Must be ' + min + '–' + max + ' characters long';
-      }
-    };
-
-    return length;
+    }
   }
 
 })();
@@ -665,25 +681,20 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     .factory('EqualsValidator', EqualsValidator);
 
   function EqualsValidator() {
-    var equals = {
+    var validator = {
       validate: validate,
-      message: function (field, opts) {
-        return _.format('{0} Must Match {1}',
-          _.capitalize(field),
-          opts);
-      }
+      message: 'Must Match'
     };
+    
+    return validator;
 
     function validate(value, instance, opts) {
-      if (_.isUndefined(value) || _.isNull(value))
-        return true;
+      if (_.isNil(value)) return true;
       
       var otherValue = _.has(opts, 'equals') ? opts.equals : opts;
 
       return _.isEqual(value, otherValue);
     }
-
-    return equals;
   }
 
 }());
@@ -698,6 +709,13 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   EmailValidator.$inject = [];
 
   function EmailValidator() {
+    var validator = {
+      message: 'Invalid Email',
+      validate: validate
+    };
+    
+    return validator;
+    
     function validate(value, instance, opts) {
       if (!opts)
         return true;
@@ -708,13 +726,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       var pattern = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
       return pattern.test(value);
     }
-
-    var required = {
-      message: 'Invalid Email',
-      validate: validate
-    };
-
-    return required;
   }
 
 })();
@@ -729,6 +740,13 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   CompareValidator.$inject = [];
 
   function CompareValidator() {
+    var validator = {
+      message: 'Must Match',
+      validate: validate
+    };
+
+    return validator;
+    
     function validate(value, instance, opts) {
       if (!opts)
         return true;
@@ -740,17 +758,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 
       return value === instance[compareField];
     }
-
-    function message(field, opts) {
-      return _.format('Must Match', opts);
-    }
-
-    var compare = {
-      message: message,
-      validate: validate
-    };
-
-    return compare;
   }
 
 })();
@@ -765,6 +772,13 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   AlphanumericValidator.$inject = [];
 
   function AlphanumericValidator() {
+    var validator = {
+      message: 'Field must be alphanumeric.',
+      validate: validate
+    };
+    
+    return validator;
+    
     function validate(value, instance, opts) {
       if (!opts)
         return true;
@@ -774,13 +788,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 
       return _.isString(value);
     }
-
-    var alphanumeric = {
-      message: 'Field must be alphanumeric.',
-      validate: validate
-    };
-
-    return alphanumeric;
   }
 
 })();
@@ -994,36 +1001,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 })();
 (function () {
   'use strict';
-  
-  angular
-  	.module('rentler.core')
-	.factory('Instantiable', InstantiableFactory);
-	
-  InstantiableFactory.$inject = [];
-  
-  function InstantiableFactory() {
-	var mixin = {
-	  create: create
-	};
-	
-	return mixin;
-	
-	function create(opts) {
-	  var _this = this;
-	  
-	  var instance = _.cloneDeep(_this);
-	  
-	  _.assign(instance, opts);
-	  
-	  _.bindAll(instance, _.functions(instance));
-    
-	  return instance;
-	}
-  }
-  
-}());
-(function () {
-  'use strict';
 
   angular
     .module('rentler.core')
@@ -1228,4 +1205,34 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     }
   }
 
+}());
+(function () {
+  'use strict';
+  
+  angular
+  	.module('rentler.core')
+	.factory('Instantiable', InstantiableFactory);
+	
+  InstantiableFactory.$inject = [];
+  
+  function InstantiableFactory() {
+	var mixin = {
+	  create: create
+	};
+	
+	return mixin;
+	
+	function create(opts) {
+	  var _this = this;
+	  
+	  var instance = _.cloneDeep(_this);
+	  
+	  _.assign(instance, opts);
+	  
+	  _.bindAll(instance, _.functions(instance));
+    
+	  return instance;
+	}
+  }
+  
 }());

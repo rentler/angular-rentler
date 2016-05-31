@@ -6,25 +6,20 @@
     .factory('EqualsValidator', EqualsValidator);
 
   function EqualsValidator() {
-    var equals = {
+    var validator = {
       validate: validate,
-      message: function (field, opts) {
-        return _.format('{0} Must Match {1}',
-          _.capitalize(field),
-          opts);
-      }
+      message: 'Must Match'
     };
+    
+    return validator;
 
     function validate(value, instance, opts) {
-      if (_.isUndefined(value) || _.isNull(value))
-        return true;
+      if (_.isNil(value)) return true;
       
       var otherValue = _.has(opts, 'equals') ? opts.equals : opts;
 
       return _.isEqual(value, otherValue);
     }
-
-    return equals;
   }
 
 }());

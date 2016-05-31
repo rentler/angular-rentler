@@ -8,6 +8,13 @@
   RangeValidator.$inject = [];
 
   function RangeValidator() {
+    var validator = {
+      validate: validate,
+      message: message
+    };
+
+    return validator;
+    
     function validate(value, instance, opts) {
       if (!opts)
         return true;
@@ -27,13 +34,19 @@
 
       return _.isNumber(+value) && +value >= min && +value <= max;
     }
-
-    var range = {
-      validate: validate,
-      message: 'Invalid'
-    };
-
-    return range;
+    
+    function message(field, opts) {
+        var minmax = _.isArray(opts) ? opts : opts.range,
+            min = minmax[0],
+            max = minmax[1];
+          
+        if (_.isNumber(min) && !_.isNumber(max))
+          return 'Must be at least ' + min;
+        else if (!_.isNumber(min) && _.isNumber(max))
+          return 'Must be under ' + max;
+        else
+          return 'Must be ' + min + '–' + max;
+    }
   }
 
 })();

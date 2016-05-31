@@ -8,6 +8,13 @@
   PatternValidator.$inject = [];
 
   function PatternValidator() {
+    var validator = {
+      message: 'Invalid',
+      validate: validate
+    };
+
+    return validator;
+    
     function validate(value, instance, opts) {
       if (!opts)
         return true;
@@ -19,13 +26,6 @@
 
       return regexp.test(value);
     }
-
-    var pattern = {
-      message: 'Field is invalid.',
-      validate: validate
-    };
-
-    return pattern;
   }
 
 })();

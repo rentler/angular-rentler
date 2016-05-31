@@ -8,6 +8,13 @@
   NumericValidator.$inject = [];
 
   function NumericValidator() {
+    var validator = {
+      message: 'Must be a number',
+      validate: validate
+    };
+
+    return validator;
+    
     function validate(value, instance, opts) {
       if (!opts)
         return true;
@@ -17,13 +24,6 @@
 
       return _.isString(value) && !_.isNaN(+value);
     }
-
-    var numeric = {
-      message: 'Must be a number',
-      validate: validate
-    };
-
-    return numeric;
   }
 
 })();
