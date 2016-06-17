@@ -9,7 +9,7 @@
 
   function AlphanumericValidator() {
     var validator = {
-      message: 'Field must be alphanumeric.',
+      message: 'Invalid',
       validate: validate
     };
     

@@ -482,8 +482,8 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
         return true;
 
       var minmax = _.isArray(opts) ? opts : opts.range,
-          min = minmax[0] || value,
-          max = minmax[1] || value;
+          min = _.isNil(minmax[0]) ? value : minmax[0],
+          max = _.isNil(minmax[1]) ? value : minmax[1];
 
       if (_.isBoolean(value))
         return false;
@@ -494,17 +494,14 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       return _.isNumber(+value) && +value >= min && +value <= max;
     }
     
-    function message(field, opts) {
-        var minmax = _.isArray(opts) ? opts : opts.range,
-            min = minmax[0],
-            max = minmax[1];
+    function message(field, opts, value) {
+      var minmax = _.isArray(opts) ? opts : opts.range,
+          min = _.isNil(minmax[0]) ? value : minmax[0],
+          max = _.isNil(minmax[1]) ? value : minmax[1];
           
-        if (_.isNumber(min) && !_.isNumber(max))
-          return 'Must be at least ' + min;
-        else if (!_.isNumber(min) && _.isNumber(max))
-          return 'Must be under ' + max;
-        else
-          return 'Must be ' + min + '–' + max;
+      if (_.isNumber(min) && !_.isNumber(max)) return 'Minimum of ' + min;
+      else if (!_.isNumber(min) && _.isNumber(max)) return 'Maximum of ' + max;
+      else return 'Must be ' + min + '–' + max;
     }
   }
 
@@ -553,7 +550,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 
   function NumericValidator() {
     var validator = {
-      message: 'Must be a number',
+      message: 'Invalid',
       validate: validate
     };
 
@@ -632,12 +629,10 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
           min = minmax[0],
           max = minmax[1];
           
-        if (_.isNumber(min) && !_.isNumber(max))
-          return 'Must be at least ' + min + ' characters long';
-        else if (!_.isNumber(min) && _.isNumber(max))
-          return 'Must be under ' + max + ' characters long';
-        else
-          return 'Must be ' + min + '–' + max + ' characters long';
+        if (_.isNumber(min) && !_.isNumber(max)) return min + ' Characters Minimum';
+        else if (!_.isNumber(min) && _.isNumber(max)) return max + ' Characters Maximum';
+        else if (min === max) return 'Must be ' + min + ' Characters';
+        else return 'Must Be ' + min + '–' + max + ' Characters';
     }
   }
 
@@ -683,7 +678,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   function EqualsValidator() {
     var validator = {
       validate: validate,
-      message: 'Must Match'
+      message: 'Invalid'
     };
     
     return validator;
@@ -710,7 +705,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 
   function EmailValidator() {
     var validator = {
-      message: 'Invalid Email',
+      message: 'Invalid',
       validate: validate
     };
     
@@ -773,7 +768,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 
   function AlphanumericValidator() {
     var validator = {
-      message: 'Field must be alphanumeric.',
+      message: 'Invalid',
       validate: validate
     };
     
@@ -876,9 +871,9 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
               // Add any errors to the field if invalid
               if (!isValid) {
                 var message = _.isString(validatorOpts.message) ? validatorOpts.message :
-                              _.isFunction(validatorOpts.message) ? validatorOpts.message(field, validatorOpts) :
+                              _.isFunction(validatorOpts.message) ? validatorOpts.message(field, validatorOpts, _.result(model, field)) :
                               _.isString(validator.message) ? validator.message :
-                              _.isFunction(validator.message) ? validator.message(field, validatorOpts) :
+                              _.isFunction(validator.message) ? validator.message(field, validatorOpts, _.result(model, field)) :
                               'Invalid';
 
                 _this.errors[field].push(message);
@@ -999,6 +994,36 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
 
 })();
+(function () {
+  'use strict';
+  
+  angular
+  	.module('rentler.core')
+	.factory('Instantiable', InstantiableFactory);
+	
+  InstantiableFactory.$inject = [];
+  
+  function InstantiableFactory() {
+	var mixin = {
+	  create: create
+	};
+	
+	return mixin;
+	
+	function create(opts) {
+	  var _this = this;
+	  
+	  var instance = _.cloneDeep(_this);
+	  
+	  _.assign(instance, opts);
+	  
+	  _.bindAll(instance, _.functions(instance));
+    
+	  return instance;
+	}
+  }
+  
+}());
 (function () {
   'use strict';
 
@@ -1205,34 +1230,4 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     }
   }
 
-}());
-(function () {
-  'use strict';
-  
-  angular
-  	.module('rentler.core')
-	.factory('Instantiable', InstantiableFactory);
-	
-  InstantiableFactory.$inject = [];
-  
-  function InstantiableFactory() {
-	var mixin = {
-	  create: create
-	};
-	
-	return mixin;
-	
-	function create(opts) {
-	  var _this = this;
-	  
-	  var instance = _.cloneDeep(_this);
-	  
-	  _.assign(instance, opts);
-	  
-	  _.bindAll(instance, _.functions(instance));
-    
-	  return instance;
-	}
-  }
-  
 }());

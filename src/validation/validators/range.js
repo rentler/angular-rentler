@@ -23,8 +23,8 @@
         return true;
 
       var minmax = _.isArray(opts) ? opts : opts.range,
-          min = minmax[0] || value,
-          max = minmax[1] || value;
+          min = _.isNil(minmax[0]) ? value : minmax[0],
+          max = _.isNil(minmax[1]) ? value : minmax[1];
 
       if (_.isBoolean(value))
         return false;
@@ -35,17 +35,14 @@
       return _.isNumber(+value) && +value >= min && +value <= max;
     }
     
-    function message(field, opts) {
-        var minmax = _.isArray(opts) ? opts : opts.range,
-            min = minmax[0],
-            max = minmax[1];
+    function message(field, opts, value) {
+      var minmax = _.isArray(opts) ? opts : opts.range,
+          min = _.isNil(minmax[0]) ? value : minmax[0],
+          max = _.isNil(minmax[1]) ? value : minmax[1];
           
-        if (_.isNumber(min) && !_.isNumber(max))
-          return 'Must be at least ' + min;
-        else if (!_.isNumber(min) && _.isNumber(max))
-          return 'Must be under ' + max;
-        else
-          return 'Must be ' + min + '–' + max;
+      if (_.isNumber(min) && !_.isNumber(max)) return 'Minimum of ' + min;
+      else if (!_.isNumber(min) && _.isNumber(max)) return 'Maximum of ' + max;
+      else return 'Must be ' + min + '–' + max;
     }
   }
 

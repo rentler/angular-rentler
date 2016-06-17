@@ -82,9 +82,9 @@
               // Add any errors to the field if invalid
               if (!isValid) {
                 var message = _.isString(validatorOpts.message) ? validatorOpts.message :
-                              _.isFunction(validatorOpts.message) ? validatorOpts.message(field, validatorOpts) :
+                              _.isFunction(validatorOpts.message) ? validatorOpts.message(field, validatorOpts, _.result(model, field)) :
                               _.isString(validator.message) ? validator.message :
-                              _.isFunction(validator.message) ? validator.message(field, validatorOpts) :
+                              _.isFunction(validator.message) ? validator.message(field, validatorOpts, _.result(model, field)) :
                               'Invalid';
 
                 _this.errors[field].push(message);

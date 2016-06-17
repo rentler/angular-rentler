@@ -31,12 +31,10 @@
           min = minmax[0],
           max = minmax[1];
           
-        if (_.isNumber(min) && !_.isNumber(max))
-          return 'Must be at least ' + min + ' characters long';
-        else if (!_.isNumber(min) && _.isNumber(max))
-          return 'Must be under ' + max + ' characters long';
-        else
-          return 'Must be ' + min + '–' + max + ' characters long';
+        if (_.isNumber(min) && !_.isNumber(max)) return min + ' Characters Minimum';
+        else if (!_.isNumber(min) && _.isNumber(max)) return max + ' Characters Maximum';
+        else if (min === max) return 'Must be ' + min + ' Characters';
+        else return 'Must Be ' + min + '–' + max + ' Characters';
     }
   }
 

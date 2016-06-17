@@ -9,7 +9,7 @@
 
   function EmailValidator() {
     var validator = {
-      message: 'Invalid Email',
+      message: 'Invalid',
       validate: validate
     };
     

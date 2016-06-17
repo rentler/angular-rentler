@@ -9,7 +9,7 @@
 
   function NumericValidator() {
     var validator = {
-      message: 'Must be a number',
+      message: 'Invalid',
       validate: validate
     };
 

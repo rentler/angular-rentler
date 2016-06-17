@@ -8,7 +8,7 @@
   function EqualsValidator() {
     var validator = {
       validate: validate,
-      message: 'Must Match'
+      message: 'Invalid'
     };
     
     return validator;
