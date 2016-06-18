@@ -25,8 +25,9 @@
       }
 
       var formats = [moment.ISO_8601];
-      if (!_.isNil(opts)) formats = _.union(formats, _.flatten([opts]));
-
+      if (_.isArray(opts)) formats.concat(opts);
+      else if (_.isString(opts) || _.isFunction(opts)) formats.push(opts);
+      
       return moment(value, formats, true).isValid();
     }
   }
