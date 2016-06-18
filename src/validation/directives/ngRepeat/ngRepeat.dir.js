@@ -33,7 +33,8 @@
       var match = exp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
       
       // Get collection name
-      _this.collectionName = match[2];
+      _this.collectionName = match[2].split('|')[0];
+      _this.collectionName = _.trim(_this.collectionName);
       
       // Get item name
       match = match[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);

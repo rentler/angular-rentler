@@ -19,7 +19,9 @@
       if (!opts)
         return true;
 
-      return !(_.isNull(value) || _.isUndefined(value) || (_.isString(value) && _.trim(value) === '') || (_.isArray(value) && _.isEmpty(value)));
+      return !(_.isNil(value) || 
+              (_.isString(value) && _.trim(value) === '') || 
+              (_.isArray(value) && value.length === 0));
     }
   }
 
