@@ -16,7 +16,7 @@
     return validator;
     
     function validate(value, instance, opts) {
-      if (!opts)
+      if (!opts || _.isNil(value))
         return true;
         
       if (_.isUndefined(value) || _.isNull(value))

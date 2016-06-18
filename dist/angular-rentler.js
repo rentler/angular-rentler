@@ -407,6 +407,36 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   
   angular
   	.module('rentler.core')
+	.factory('Instantiable', InstantiableFactory);
+	
+  InstantiableFactory.$inject = [];
+  
+  function InstantiableFactory() {
+	var mixin = {
+	  create: create
+	};
+	
+	return mixin;
+	
+	function create(opts) {
+	  var _this = this;
+	  
+	  var instance = _.cloneDeep(_this);
+	  
+	  _.assign(instance, opts);
+	  
+	  _.bindAll(instance, _.functions(instance));
+    
+	  return instance;
+	}
+  }
+  
+}());
+(function () {
+  'use strict';
+  
+  angular
+  	.module('rentler.core')
 	.factory('RequiredIfValidator', Factory);
 	
   Factory.$inject = ['RequiredValidator'];
@@ -478,10 +508,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     return validator;
     
     function validate(value, instance, opts) {
-      if (!opts)
-        return true;
-        
-      if (_.isUndefined(value) || _.isNull(value))
+      if (!opts || _.isNil(value))
         return true;
 
       var minmax = _.isArray(opts) ? opts : opts.range,
@@ -528,10 +555,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     return validator;
     
     function validate(value, instance, opts) {
-      if (!opts)
-        return true;
-        
-      if (_.isUndefined(value) || _.isNull(value))
+      if (!opts || _.isNil(value))
         return true;
 
       var regexp = _.isRegExp(opts) ? opts : opts.pattern;
@@ -560,10 +584,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     return validator;
     
     function validate(value, instance, opts) {
-      if (!opts)
-        return true;
-        
-      if (_.isNumber(value) || _.isUndefined(value) || _.isNull(value))
+      if (!opts || _.isNil(value) || _.isNumber(value))
         return true;
 
       return _.isString(value) && !_.isNaN(+value);
@@ -617,7 +638,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     return validator;
     
     function validate(value, instance, opts) {
-      if (!opts || !value)
+      if (!opts || _.isNil(value))
         return true;
 
       var minmax = _.isArray(opts) ? opts : opts.length,
@@ -715,7 +736,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     return validator;
     
     function validate(value, instance, opts) {
-      if (!opts)
+      if (!opts || _.isNil(value))
         return true;
         
       if (_.isUndefined(value) || _.isNull(value))
@@ -723,6 +744,41 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 
       var pattern = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
       return pattern.test(value);
+    }
+  }
+
+})();
+
+(function () {
+  'use strict';
+
+  angular
+    .module('rentler.core')
+    .factory('DateValidator', Factory);
+
+  Factory.$inject = [];
+
+  function Factory() {
+    var validator = {
+      message: 'Invalid',
+      validate: validate
+    };
+    
+    return validator;
+    
+    function validate(value, instance, opts) {
+      if (!opts || _.isNil(value) || _.isDate(value))
+        return true;
+      
+      if (!window.moment) {
+        var date = new Date(value);
+        return Object.prototype.toString.call(date) === '[object Date]' && !isNaN(date.getTime());
+      }
+
+      var formats = [moment.ISO_8601];
+      if (!_.isNil(opts)) formats = _.union(formats, _.flatten([opts]));
+
+      return moment(value, formats, true).isValid();
     }
   }
 
@@ -746,10 +802,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     return validator;
     
     function validate(value, instance, opts) {
-      if (!opts)
-        return true;
-        
-      if (_.isUndefined(value) || _.isNull(value))
+      if (!opts || _.isNil(value))
         return true;
 
       var compareField = _.isString(opts) ? opts : opts.compare;
@@ -778,10 +831,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     return validator;
     
     function validate(value, instance, opts) {
-      if (!opts)
-        return true;
-      
-      if (_.isUndefined(value) || _.isNull(value))
+      if (!opts || _.isNil(value))
         return true;
 
       return _.isString(value);
@@ -997,36 +1047,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
 
 })();
-(function () {
-  'use strict';
-  
-  angular
-  	.module('rentler.core')
-	.factory('Instantiable', InstantiableFactory);
-	
-  InstantiableFactory.$inject = [];
-  
-  function InstantiableFactory() {
-	var mixin = {
-	  create: create
-	};
-	
-	return mixin;
-	
-	function create(opts) {
-	  var _this = this;
-	  
-	  var instance = _.cloneDeep(_this);
-	  
-	  _.assign(instance, opts);
-	  
-	  _.bindAll(instance, _.functions(instance));
-    
-	  return instance;
-	}
-  }
-  
-}());
 (function () {
   'use strict';
 

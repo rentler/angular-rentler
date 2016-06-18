@@ -16,10 +16,7 @@
     return validator;
     
     function validate(value, instance, opts) {
-      if (!opts)
-        return true;
-        
-      if (_.isUndefined(value) || _.isNull(value))
+      if (!opts || _.isNil(value))
         return true;
 
       var minmax = _.isArray(opts) ? opts : opts.range,

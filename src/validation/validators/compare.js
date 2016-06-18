@@ -16,10 +16,7 @@
     return validator;
     
     function validate(value, instance, opts) {
-      if (!opts)
-        return true;
-        
-      if (_.isUndefined(value) || _.isNull(value))
+      if (!opts || _.isNil(value))
         return true;
 
       var compareField = _.isString(opts) ? opts : opts.compare;

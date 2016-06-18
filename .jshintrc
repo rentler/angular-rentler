@@ -22,8 +22,10 @@
   "validthis": true,
   "laxbreak":  true,
   "globals": {
+    "window": false,
     "_": false,
     "angular": false,
-    "inject": false
+    "inject": false,
+    "moment": false
   }
 }
