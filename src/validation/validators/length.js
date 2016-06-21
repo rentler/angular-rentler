@@ -16,7 +16,7 @@
     return validator;
     
     function validate(value, instance, opts) {
-      if (!opts || _.isNil(value))
+      if (!opts || _.isNil(value) || (_.isString(value) && value.length === 0))
         return true;
 
       var minmax = _.isArray(opts) ? opts : opts.length,

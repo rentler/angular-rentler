@@ -138,63 +138,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 })();
 (function () {
   'use strict';
-  
-  angular
-    .module('rentler.core')
-    .directive('ngRepeat', Directive);
-  
-  Directive.$inject = [];
-  
-  function Directive() {
-    var directive = {
-      restrict: 'EA',
-      controller: controller
-    };
-    
-    return directive;
-  }
-  
-  controller.$inject = ['$scope', '$element', '$attrs'];
-  
-  function controller($scope, $element, $attrs) {
-    var _this = this;
-    
-    _this.index = $scope.$index;
-    _this.collectionName = null;
-    _this.itemName = null;
-    _this.ngRepeat = $element.parent().controller('ngRepeat');
-    _this.listeners = [];
-    
-    function init() {
-      // Deconstruct expression
-      var exp = $attrs.ngRepeat;
-      var match = exp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
-      
-      // Get collection name
-      _this.collectionName = match[2].split('|')[0];
-      _this.collectionName = _.trim(_this.collectionName);
-      
-      // Get item name
-      match = match[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
-      _this.itemName = match[3] || match[1];
-      
-      // Watch for index changes
-      $scope.$watch('$index', function (newIndex) {
-        _this.index = newIndex;
-
-        // Fire listeners
-        _.forEach(_this.listeners, function (listener) {
-          listener();
-        });
-      });
-    }
-    
-    init();
-  }
-  
-})();
-(function () {
-  'use strict';
 
   angular
   	.module('rentler.core')
@@ -271,63 +214,56 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   'use strict';
   
   angular
-  	.module('rentler.core')
-	.directive('ngForm', FormDirective);
-	
-  FormDirective.$inject = ['$parse'];
+    .module('rentler.core')
+    .directive('ngRepeat', Directive);
   
-  function FormDirective($parse) {
-	  var directive = {
+  Directive.$inject = [];
+  
+  function Directive() {
+    var directive = {
       restrict: 'EA',
-      require: 'form',
-      link: link
+      controller: controller
     };
     
     return directive;
+  }
+  
+  controller.$inject = ['$scope', '$element', '$attrs'];
+  
+  function controller($scope, $element, $attrs) {
+    var _this = this;
     
-    function link(scope, elem, attrs, ctrl) {
-      // Find submit button
-      var btns = [elem.find('button'), elem.find('input')];
+    _this.index = $scope.$index;
+    _this.collectionName = null;
+    _this.itemName = null;
+    _this.ngRepeat = $element.parent().controller('ngRepeat');
+    _this.listeners = [];
+    
+    function init() {
+      // Deconstruct expression
+      var exp = $attrs.ngRepeat;
+      var match = exp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
       
-      var submitBtn = _.find(btns, function (btn) {
-        for (var i = 0; i < btn.length; i++)
-          return btn[i].type.toLowerCase() === 'submit';
+      // Get collection name
+      _this.collectionName = match[2].split('|')[0];
+      _this.collectionName = _.trim(_this.collectionName);
+      
+      // Get item name
+      match = match[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
+      _this.itemName = match[3] || match[1];
+      
+      // Watch for index changes
+      $scope.$watch('$index', function (newIndex) {
+        _this.index = newIndex;
+
+        // Fire listeners
+        _.forEach(_this.listeners, function (listener) {
+          listener();
+        });
       });
-      
-      // Submit button clicked
-      angular.element(submitBtn).bind('click', function (e) {
-        e.preventDefault();
-        
-        if (!attrs.ngSubmit || !_.isUndefined(angular.element(this).attr('ng-click')))
-          return;
-        
-        submit();
-        
-        return;
-      });
-      
-      // Enter key
-      elem.bind('keydown', function (e) {
-        var keyCode = e.keyCode || e.which;
-        
-        if (keyCode !== 13) return;
-        
-        if (attrs.ngSubmit) submit();
-        
-        if (submitBtn) submitBtn.click();
-      });
-      
-      // Submit handler
-      elem.on('submit', function () {
-        submit();
-      });
-      
-      // Submit
-      function submit() {
-        ctrl.$submitted = true;
-        $parse(attrs.ngSubmit)(scope);
-      }
     }
+    
+    init();
   }
   
 })();
@@ -402,6 +338,70 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
 
 }());
+(function () {
+  'use strict';
+  
+  angular
+  	.module('rentler.core')
+	.directive('ngForm', FormDirective);
+	
+  FormDirective.$inject = ['$parse'];
+  
+  function FormDirective($parse) {
+	  var directive = {
+      restrict: 'EA',
+      require: 'form',
+      link: link
+    };
+    
+    return directive;
+    
+    function link(scope, elem, attrs, ctrl) {
+      // Find submit button
+      var btns = [elem.find('button'), elem.find('input')];
+      
+      var submitBtn = _.find(btns, function (btn) {
+        for (var i = 0; i < btn.length; i++)
+          return btn[i].type.toLowerCase() === 'submit';
+      });
+      
+      // Submit button clicked
+      angular.element(submitBtn).bind('click', function (e) {
+        e.preventDefault();
+        
+        if (!attrs.ngSubmit || !_.isUndefined(angular.element(this).attr('ng-click')))
+          return;
+        
+        submit();
+        
+        return;
+      });
+      
+      // Enter key
+      elem.bind('keydown', function (e) {
+        var keyCode = e.keyCode || e.which;
+        
+        if (keyCode !== 13) return;
+        
+        if (attrs.ngSubmit) submit();
+        
+        if (submitBtn) submitBtn.click();
+      });
+      
+      // Submit handler
+      elem.on('submit', function () {
+        submit();
+      });
+      
+      // Submit
+      function submit() {
+        ctrl.$submitted = true;
+        $parse(attrs.ngSubmit)(scope);
+      }
+    }
+  }
+  
+})();
 (function () {
   'use strict';
   
@@ -608,7 +608,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     return validator;
     
     function validate(value, instance, opts) {
-      if (!opts || _.isNil(value))
+      if (!opts || _.isNil(value) || (_.isString(value) && value.length === 0))
         return true;
 
       var minmax = _.isArray(opts) ? opts : opts.length,

@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  fdescribe('DateValidator', function () {
+  describe('DateValidator', function () {
     var DateValidator;
 
     beforeEach(module('rentler.core'));
