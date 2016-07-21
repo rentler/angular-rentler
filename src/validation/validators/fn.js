@@ -20,7 +20,7 @@
       
       var fn = _.isFunction(opts) ? opts : opts.fn;
       
-      var isValid = fn(instance);
+      var isValid = fn(instance, value);
 
       return isValid;
     }
