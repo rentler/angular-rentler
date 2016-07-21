@@ -5,7 +5,7 @@
   	.module('rentler.core', []);
 	  
 }());
-angular.module("rentler.core").run(["$templateCache", function($templateCache) {$templateCache.put("validation/directives/validateMsg/validateMsg.html","<div class=\"help-block\" ng-if=\"messages.length > 0\">\n  <div ng-repeat=\"message in messages | limitTo:1\">{{message}}</div>\n</div>");}]);
+angular.module("rentler.core").run(["$templateCache", function($templateCache) {$templateCache.put("validation/directives/validateMsg/validateMsg.html","<div class=\"help-block\" ng-if=\"messages.length > 0\">\r\n  <div ng-repeat=\"message in messages | limitTo:1\">{{message}}</div>\r\n</div>");}]);
 (function () {
   'use strict';
   
@@ -654,7 +654,7 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       
       var fn = _.isFunction(opts) ? opts : opts.fn;
       
-      var isValid = fn(instance);
+      var isValid = fn(instance, value);
 
       return isValid;
     }
