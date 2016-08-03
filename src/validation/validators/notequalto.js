@@ -21,7 +21,7 @@
 
       var compareField = _.isString(opts) ? opts : opts.notEqualTo;
 
-      return value !== instance[compareField];
+      return value !== _.get(instance, compareField);
     }
   }
 
