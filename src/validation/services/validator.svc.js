@@ -84,7 +84,7 @@
               // Get the validator and validate
               var factoryValidatorName = _.upperFirst(validatorName) + 'Validator',
                   validator = $injector.get(factoryValidatorName),
-                  isValid = validator.validate(_.result(model, field), (item) ? item : model, validatorOpts);
+                  isValid = validator.validate(_.result(model, field), model, validatorOpts, item);
 
               // Add any errors to the field if invalid
               if (!isValid) {
