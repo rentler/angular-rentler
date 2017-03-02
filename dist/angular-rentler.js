@@ -407,6 +407,36 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   
   angular
   	.module('rentler.core')
+	.factory('Instantiable', InstantiableFactory);
+	
+  InstantiableFactory.$inject = [];
+  
+  function InstantiableFactory() {
+	var mixin = {
+	  create: create
+	};
+	
+	return mixin;
+	
+	function create(opts) {
+	  var _this = this;
+	  
+	  var instance = _.cloneDeep(_this);
+	  
+	  _.assign(instance, opts);
+	  
+	  _.bindAll(instance, _.functions(instance));
+    
+	  return instance;
+	}
+  }
+  
+}());
+(function () {
+  'use strict';
+  
+  angular
+  	.module('rentler.core')
 	.factory('RequiredIfValidator', Factory);
 	
   Factory.$inject = ['RequiredValidator'];
@@ -1261,34 +1291,4 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     }
   }
 
-}());
-(function () {
-  'use strict';
-  
-  angular
-  	.module('rentler.core')
-	.factory('Instantiable', InstantiableFactory);
-	
-  InstantiableFactory.$inject = [];
-  
-  function InstantiableFactory() {
-	var mixin = {
-	  create: create
-	};
-	
-	return mixin;
-	
-	function create(opts) {
-	  var _this = this;
-	  
-	  var instance = _.cloneDeep(_this);
-	  
-	  _.assign(instance, opts);
-	  
-	  _.bindAll(instance, _.functions(instance));
-    
-	  return instance;
-	}
-  }
-  
 }());
