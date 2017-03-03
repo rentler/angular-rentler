@@ -86,7 +86,7 @@
       model.hasLastName = false;
       modelValidator.validate();
       
-      expect(modelValidator.errors.lastName).toBeUndefined();
+      expect(modelValidator.errors.lastName.length).toBe(0);
     });
     
     it('should be able to validate collections', function () {

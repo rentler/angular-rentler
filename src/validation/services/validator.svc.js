@@ -42,15 +42,14 @@
                           (_.isArray(fields) && !_.includes(fields, field)))
                 return;
 
+            // Initialize validation for field
+            _this.errors[field] = [];
 
             // Skip if validateIf results in falsey
             if (_.has(validators, 'validateIf') &&
                 _.isFunction(validators.validateIf) &&
                 validators.validateIf(model) === false)
                 return;
-
-            // Initialize validation for field
-            _this.errors[field] = [];
 
             // Iterate each validator
             _.forIn(validators, function (validatorOpts, validatorName) {

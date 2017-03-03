@@ -4,7 +4,8 @@
   "description": "Data and validation tools for developing with angularjs",
   "main": "dist/angular-rentler.min.js",
   "scripts": {
-    "test": "gulp test"
+    "test": "gulp test",
+    "build": "gulp build"
   },
   "repository": {
     "type": "git",
