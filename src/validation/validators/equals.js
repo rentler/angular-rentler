@@ -18,6 +18,11 @@
       
       var otherValue = _.has(opts, 'equals') ? opts.equals : opts;
 
+      if (_.isString(value) && _.isString(otherValue)) {
+        value = value.toLowerCase();
+        otherValue = otherValue.toLowerCase();
+      }
+
       return _.isEqual(value, otherValue);
     }
   }

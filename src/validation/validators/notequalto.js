@@ -21,7 +21,14 @@
 
       var compareField = _.isString(opts) ? opts : opts.notEqualTo;
 
-      return value !== _.get(instance, compareField);
+      var compareValue = _.get(instance, compareField);
+
+      if (_.isString(value) && _.isString(compareValue)) {
+        value = value.toLowerCase();
+        compareValue = compareValue.toLowerCase();
+      }
+      
+      return value !== compareValue;
     }
   }
 

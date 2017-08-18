@@ -5,7 +5,7 @@
   	.module('rentler.core', []);
 	  
 }());
-angular.module("rentler.core").run(["$templateCache", function($templateCache) {$templateCache.put("validation/directives/validateMsg/validateMsg.html","<div class=\"help-block\" ng-if=\"messages.length > 0\">\n  <div ng-repeat=\"message in messages | limitTo:1\">{{message}}</div>\n</div>");}]);
+angular.module("rentler.core").run(["$templateCache", function($templateCache) {$templateCache.put("validation/directives/validateMsg/validateMsg.html","<div class=\"help-block\" ng-if=\"messages.length > 0\">\r\n  <div ng-repeat=\"message in messages | limitTo:1\">{{message}}</div>\r\n</div>");}]);
 (function () {
   'use strict';
   
@@ -62,80 +62,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     }
   }
     
-})();
-(function () {
-  'use strict';
-
-  angular
-  	.module('rentler.core')
-	  .directive('rValidateClass', ValidateClassDirective);
-
-  ValidateClassDirective.$inject = ['Validation'];
-
-  function ValidateClassDirective(Validation) {
-    var directive = {
-      restrict: 'A',
-      require: ['^form', '^rValidator', '?^ngRepeat'],
-      link: link
-    };
-
-    return directive;
-
-    function link(scope, element, attrs, ctrls) {
-      // Get controllers
-      var formCtrl = ctrls[0],
-          rValidatorCtrl = ctrls[1],
-          ngRepeatCtrl = ctrls[2];
-          
-      // No validation
-      if (!rValidatorCtrl) return;
-      
-      // Get validator
-      var validator = _.get(rValidatorCtrl, 'validator');
-      
-      // Initialize field name
-      var fieldName = '';
-      var fieldNameOptions = {
-        attrFieldName: attrs.rValidateClass,
-        ngRepeatCtrl: ngRepeatCtrl,
-        validator: validator
-      };
-      assignFieldName();
-      
-      // Watch field name for collections
-      if (ngRepeatCtrl) ngRepeatCtrl.listeners.push(assignFieldName);
-      
-      function assignFieldName() {
-        fieldName = Validation.getFieldName(fieldNameOptions);
-      }
-
-      // Verify field is in schema
-      var schemaFieldName = fieldName.replace(/\[\d+\]/g, '.collection');
-      if (!_.has(validator.schema, schemaFieldName)) return;
-      
-      // Add to validation listeners
-      rValidatorCtrl.listeners.push(listener);
-      
-      function listener() {
-        // Not submitted no validation
-        if (!formCtrl.$submitted || !_.has(validator.errors, fieldName)) return;
-        
-        // Get errors length
-        var length = validator.errors[fieldName].length;
-        
-        // Add approriate classes
-        if (length === 0) element.removeClass(Validation.getClasses().error).addClass(Validation.getClasses().success);
-        else if (length > 0) element.addClass(Validation.getClasses().error).removeClass(Validation.getClasses().success);
-      }
-      
-      // Cleanup
-      scope.$on('$destroy', function () {
-        _.pull(rValidatorCtrl.listeners, listener);
-        if (ngRepeatCtrl) _.pull(ngRepeatCtrl.listeners, assignFieldName);
-      });
-    }
-  }
-
 })();
 (function () {
   'use strict';
@@ -214,6 +140,137 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   'use strict';
 
   angular
+  	.module('rentler.core')
+	  .directive('rValidateClass', ValidateClassDirective);
+
+  ValidateClassDirective.$inject = ['Validation'];
+
+  function ValidateClassDirective(Validation) {
+    var directive = {
+      restrict: 'A',
+      require: ['^form', '^rValidator', '?^ngRepeat'],
+      link: link
+    };
+
+    return directive;
+
+    function link(scope, element, attrs, ctrls) {
+      // Get controllers
+      var formCtrl = ctrls[0],
+          rValidatorCtrl = ctrls[1],
+          ngRepeatCtrl = ctrls[2];
+          
+      // No validation
+      if (!rValidatorCtrl) return;
+      
+      // Get validator
+      var validator = _.get(rValidatorCtrl, 'validator');
+      
+      // Initialize field name
+      var fieldName = '';
+      var fieldNameOptions = {
+        attrFieldName: attrs.rValidateClass,
+        ngRepeatCtrl: ngRepeatCtrl,
+        validator: validator
+      };
+      assignFieldName();
+      
+      // Watch field name for collections
+      if (ngRepeatCtrl) ngRepeatCtrl.listeners.push(assignFieldName);
+      
+      function assignFieldName() {
+        fieldName = Validation.getFieldName(fieldNameOptions);
+      }
+
+      // Verify field is in schema
+      var schemaFieldName = fieldName.replace(/\[\d+\]/g, '.collection');
+      if (!_.has(validator.schema, schemaFieldName)) return;
+      
+      // Add to validation listeners
+      rValidatorCtrl.listeners.push(listener);
+      
+      function listener() {
+        // Not submitted no validation
+        if (!formCtrl.$submitted || !_.has(validator.errors, fieldName)) return;
+        
+        // Get errors length
+        var length = validator.errors[fieldName].length;
+        
+        // Add approriate classes
+        if (length === 0) element.removeClass(Validation.getClasses().error).addClass(Validation.getClasses().success);
+        else if (length > 0) element.addClass(Validation.getClasses().error).removeClass(Validation.getClasses().success);
+      }
+      
+      // Cleanup
+      scope.$on('$destroy', function () {
+        _.pull(rValidatorCtrl.listeners, listener);
+        if (ngRepeatCtrl) _.pull(ngRepeatCtrl.listeners, assignFieldName);
+      });
+    }
+  }
+
+})();
+(function () {
+  'use strict';
+  
+  angular
+    .module('rentler.core')
+    .directive('ngRepeat', Directive);
+  
+  Directive.$inject = [];
+  
+  function Directive() {
+    var directive = {
+      restrict: 'EA',
+      controller: controller
+    };
+    
+    return directive;
+  }
+  
+  controller.$inject = ['$scope', '$element', '$attrs'];
+  
+  function controller($scope, $element, $attrs) {
+    var _this = this;
+    
+    _this.index = $scope.$index;
+    _this.collectionName = null;
+    _this.itemName = null;
+    _this.ngRepeat = $element.parent().controller('ngRepeat');
+    _this.listeners = [];
+    
+    function init() {
+      // Deconstruct expression
+      var exp = $attrs.ngRepeat;
+      var match = exp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
+      
+      // Get collection name
+      _this.collectionName = match[2].split('|')[0];
+      _this.collectionName = _.trim(_this.collectionName);
+      
+      // Get item name
+      match = match[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
+      _this.itemName = match[3] || match[1];
+      
+      // Watch for index changes
+      $scope.$watch('$index', function (newIndex) {
+        _this.index = newIndex;
+
+        // Fire listeners
+        _.forEach(_this.listeners, function (listener) {
+          listener();
+        });
+      });
+    }
+    
+    init();
+  }
+  
+})();
+(function () {
+  'use strict';
+
+  angular
     .module('rentler.core')
     .directive('ngModel', Directive);
 
@@ -281,63 +338,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
 
 }());
-(function () {
-  'use strict';
-  
-  angular
-    .module('rentler.core')
-    .directive('ngRepeat', Directive);
-  
-  Directive.$inject = [];
-  
-  function Directive() {
-    var directive = {
-      restrict: 'EA',
-      controller: controller
-    };
-    
-    return directive;
-  }
-  
-  controller.$inject = ['$scope', '$element', '$attrs'];
-  
-  function controller($scope, $element, $attrs) {
-    var _this = this;
-    
-    _this.index = $scope.$index;
-    _this.collectionName = null;
-    _this.itemName = null;
-    _this.ngRepeat = $element.parent().controller('ngRepeat');
-    _this.listeners = [];
-    
-    function init() {
-      // Deconstruct expression
-      var exp = $attrs.ngRepeat;
-      var match = exp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
-      
-      // Get collection name
-      _this.collectionName = match[2].split('|')[0];
-      _this.collectionName = _.trim(_this.collectionName);
-      
-      // Get item name
-      match = match[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
-      _this.itemName = match[3] || match[1];
-      
-      // Watch for index changes
-      $scope.$watch('$index', function (newIndex) {
-        _this.index = newIndex;
-
-        // Fire listeners
-        _.forEach(_this.listeners, function (listener) {
-          listener();
-        });
-      });
-    }
-    
-    init();
-  }
-  
-})();
 (function () {
   'use strict';
   
@@ -587,7 +587,14 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 
       var compareField = _.isString(opts) ? opts : opts.notEqualTo;
 
-      return value !== _.get(instance, compareField);
+      var compareValue = _.get(instance, compareField);
+
+      if (_.isString(value) && _.isString(compareValue)) {
+        value = value.toLowerCase();
+        compareValue = compareValue.toLowerCase();
+      }
+      
+      return value !== compareValue;
     }
   }
 
@@ -711,6 +718,11 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       if (_.isNil(value)) return true;
       
       var otherValue = _.has(opts, 'equals') ? opts.equals : opts;
+
+      if (_.isString(value) && _.isString(otherValue)) {
+        value = value.toLowerCase();
+        otherValue = otherValue.toLowerCase();
+      }
 
       return _.isEqual(value, otherValue);
     }
