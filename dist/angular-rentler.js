@@ -5,7 +5,7 @@
   	.module('rentler.core', []);
 	  
 }());
-angular.module("rentler.core").run(["$templateCache", function($templateCache) {$templateCache.put("validation/directives/validateMsg/validateMsg.html","<div class=\"help-block\" ng-if=\"messages.length > 0\">\n  <div ng-repeat=\"message in messages | limitTo:1\">{{message}}</div>\n</div>");}]);
+angular.module("rentler.core").run(["$templateCache", function($templateCache) {$templateCache.put("validation/directives/validateMsg/validateMsg.html","<div class=\"help-block\" ng-if=\"messages.length > 0\">\r\n  <div ng-repeat=\"message in messages | limitTo:1\">{{message}}</div>\r\n</div>");}]);
 (function () {
   'use strict';
   
@@ -62,80 +62,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
     }
   }
     
-})();
-(function () {
-  'use strict';
-
-  angular
-  	.module('rentler.core')
-	  .directive('rValidateClass', ValidateClassDirective);
-
-  ValidateClassDirective.$inject = ['Validation'];
-
-  function ValidateClassDirective(Validation) {
-    var directive = {
-      restrict: 'A',
-      require: ['^form', '^rValidator', '?^ngRepeat'],
-      link: link
-    };
-
-    return directive;
-
-    function link(scope, element, attrs, ctrls) {
-      // Get controllers
-      var formCtrl = ctrls[0],
-          rValidatorCtrl = ctrls[1],
-          ngRepeatCtrl = ctrls[2];
-          
-      // No validation
-      if (!rValidatorCtrl) return;
-      
-      // Get validator
-      var validator = _.get(rValidatorCtrl, 'validator');
-      
-      // Initialize field name
-      var fieldName = '';
-      var fieldNameOptions = {
-        attrFieldName: attrs.rValidateClass,
-        ngRepeatCtrl: ngRepeatCtrl,
-        validator: validator
-      };
-      assignFieldName();
-      
-      // Watch field name for collections
-      if (ngRepeatCtrl) ngRepeatCtrl.listeners.push(assignFieldName);
-      
-      function assignFieldName() {
-        fieldName = Validation.getFieldName(fieldNameOptions);
-      }
-
-      // Verify field is in schema
-      var schemaFieldName = fieldName.replace(/\[\d+\]/g, '.collection');
-      if (!_.has(validator.schema, schemaFieldName)) return;
-      
-      // Add to validation listeners
-      rValidatorCtrl.listeners.push(listener);
-      
-      function listener() {
-        // Not submitted no validation
-        if (!formCtrl.$submitted || !_.has(validator.errors, fieldName)) return;
-        
-        // Get errors length
-        var length = validator.errors[fieldName].length;
-        
-        // Add approriate classes
-        if (length === 0) element.removeClass(Validation.getClasses().error).addClass(Validation.getClasses().success);
-        else if (length > 0) element.addClass(Validation.getClasses().error).removeClass(Validation.getClasses().success);
-      }
-      
-      // Cleanup
-      scope.$on('$destroy', function () {
-        _.pull(rValidatorCtrl.listeners, listener);
-        if (ngRepeatCtrl) _.pull(ngRepeatCtrl.listeners, assignFieldName);
-      });
-    }
-  }
-
 })();
 (function () {
   'use strict';
@@ -214,6 +140,137 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   'use strict';
 
   angular
+  	.module('rentler.core')
+	  .directive('rValidateClass', ValidateClassDirective);
+
+  ValidateClassDirective.$inject = ['Validation'];
+
+  function ValidateClassDirective(Validation) {
+    var directive = {
+      restrict: 'A',
+      require: ['^form', '^rValidator', '?^ngRepeat'],
+      link: link
+    };
+
+    return directive;
+
+    function link(scope, element, attrs, ctrls) {
+      // Get controllers
+      var formCtrl = ctrls[0],
+          rValidatorCtrl = ctrls[1],
+          ngRepeatCtrl = ctrls[2];
+          
+      // No validation
+      if (!rValidatorCtrl) return;
+      
+      // Get validator
+      var validator = _.get(rValidatorCtrl, 'validator');
+      
+      // Initialize field name
+      var fieldName = '';
+      var fieldNameOptions = {
+        attrFieldName: attrs.rValidateClass,
+        ngRepeatCtrl: ngRepeatCtrl,
+        validator: validator
+      };
+      assignFieldName();
+      
+      // Watch field name for collections
+      if (ngRepeatCtrl) ngRepeatCtrl.listeners.push(assignFieldName);
+      
+      function assignFieldName() {
+        fieldName = Validation.getFieldName(fieldNameOptions);
+      }
+
+      // Verify field is in schema
+      var schemaFieldName = fieldName.replace(/\[\d+\]/g, '.collection');
+      if (!_.has(validator.schema, schemaFieldName)) return;
+      
+      // Add to validation listeners
+      rValidatorCtrl.listeners.push(listener);
+      
+      function listener() {
+        // Not submitted no validation
+        if (!formCtrl.$submitted || !_.has(validator.errors, fieldName)) return;
+        
+        // Get errors length
+        var length = validator.errors[fieldName].length;
+        
+        // Add approriate classes
+        if (length === 0) element.removeClass(Validation.getClasses().error).addClass(Validation.getClasses().success);
+        else if (length > 0) element.addClass(Validation.getClasses().error).removeClass(Validation.getClasses().success);
+      }
+      
+      // Cleanup
+      scope.$on('$destroy', function () {
+        _.pull(rValidatorCtrl.listeners, listener);
+        if (ngRepeatCtrl) _.pull(ngRepeatCtrl.listeners, assignFieldName);
+      });
+    }
+  }
+
+})();
+(function () {
+  'use strict';
+  
+  angular
+    .module('rentler.core')
+    .directive('ngRepeat', Directive);
+  
+  Directive.$inject = [];
+  
+  function Directive() {
+    var directive = {
+      restrict: 'EA',
+      controller: controller
+    };
+    
+    return directive;
+  }
+  
+  controller.$inject = ['$scope', '$element', '$attrs'];
+  
+  function controller($scope, $element, $attrs) {
+    var _this = this;
+    
+    _this.index = $scope.$index;
+    _this.collectionName = null;
+    _this.itemName = null;
+    _this.ngRepeat = $element.parent().controller('ngRepeat');
+    _this.listeners = [];
+    
+    function init() {
+      // Deconstruct expression
+      var exp = $attrs.ngRepeat;
+      var match = exp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
+      
+      // Get collection name
+      _this.collectionName = match[2].split('|')[0];
+      _this.collectionName = _.trim(_this.collectionName);
+      
+      // Get item name
+      match = match[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
+      _this.itemName = match[3] || match[1];
+      
+      // Watch for index changes
+      $scope.$watch('$index', function (newIndex) {
+        _this.index = newIndex;
+
+        // Fire listeners
+        _.forEach(_this.listeners, function (listener) {
+          listener();
+        });
+      });
+    }
+    
+    init();
+  }
+  
+})();
+(function () {
+  'use strict';
+
+  angular
     .module('rentler.core')
     .directive('ngModel', Directive);
 
@@ -285,63 +342,6 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   'use strict';
   
   angular
-    .module('rentler.core')
-    .directive('ngRepeat', Directive);
-  
-  Directive.$inject = [];
-  
-  function Directive() {
-    var directive = {
-      restrict: 'EA',
-      controller: controller
-    };
-    
-    return directive;
-  }
-  
-  controller.$inject = ['$scope', '$element', '$attrs'];
-  
-  function controller($scope, $element, $attrs) {
-    var _this = this;
-    
-    _this.index = $scope.$index;
-    _this.collectionName = null;
-    _this.itemName = null;
-    _this.ngRepeat = $element.parent().controller('ngRepeat');
-    _this.listeners = [];
-    
-    function init() {
-      // Deconstruct expression
-      var exp = $attrs.ngRepeat;
-      var match = exp.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
-      
-      // Get collection name
-      _this.collectionName = match[2].split('|')[0];
-      _this.collectionName = _.trim(_this.collectionName);
-      
-      // Get item name
-      match = match[1].match(/^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/);
-      _this.itemName = match[3] || match[1];
-      
-      // Watch for index changes
-      $scope.$watch('$index', function (newIndex) {
-        _this.index = newIndex;
-
-        // Fire listeners
-        _.forEach(_this.listeners, function (listener) {
-          listener();
-        });
-      });
-    }
-    
-    init();
-  }
-  
-})();
-(function () {
-  'use strict';
-  
-  angular
   	.module('rentler.core')
 	.directive('ngForm', FormDirective);
 	
@@ -402,6 +402,243 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
   
 })();
+(function () {
+  'use strict';
+  
+  angular
+  	.module('rentler.core')
+	.factory('Instantiable', InstantiableFactory);
+	
+  InstantiableFactory.$inject = [];
+  
+  function InstantiableFactory() {
+	var mixin = {
+	  create: create
+	};
+	
+	return mixin;
+	
+	function create(opts) {
+	  var _this = this;
+	  
+	  var instance = _.cloneDeep(_this);
+	  
+	  _.assign(instance, opts);
+	  
+	  _.bindAll(instance, _.functions(instance));
+    
+	  return instance;
+	}
+  }
+  
+}());
+(function () {
+  'use strict';
+
+  angular
+    .module('rentler.core')
+    .provider('DataModel', DataModelProvider);
+
+  DataModelProvider.$inject = [];
+
+  function DataModelProvider() {
+    var baseUrl;
+
+    this.setBaseUrl = function (value) {
+      baseUrl = value;
+    };
+
+    this.$get = DataModel;
+
+    DataModel.$inject = ['$q', '$http', '$injector', 'Instantiable'];
+
+    function DataModel($q, $http, $injector, Instantiable) {
+      
+      var mixin = {
+        get: get,
+        list: list,
+        save: save,
+        remove: remove,
+        http: http,
+        relationalize: relationalize,
+        progress: { }
+      };
+      
+      _.assign(mixin, _.cloneDeep(Instantiable));
+
+      return mixin;
+
+      function get(id) {
+        var _this = this;
+
+        var url = buildUrl(_this.url, id, _this);
+
+        _this.progress.get = true;
+
+        var promise = $http({
+          method: 'GET',
+          url: url
+        })
+        .then(function (response) {
+
+          _.assign(_this, response.data);
+
+          _this.relationalize();
+
+          return _this;
+        })
+        .finally(function () {
+          _this.progress.get = false;
+        });
+
+        return promise;
+      }
+
+      function list(options) {
+        var _this = this;
+
+        _this.progress.list = true;
+
+        var url = buildUrl(_this.url, null, _this, options);
+
+        var promise = $http({
+          method: 'GET',
+          url: url
+        })
+        .then(function (response) {
+          _.assign(_this, response.data);
+
+          _.assign(_this, {
+            // Pager helper functions here
+          });
+
+          _.forEach(_this.items, function (item) {
+            item = _this.create(item);
+          });
+
+          return _this;
+        })
+        .finally(function () {
+          _this.progress.list = false;
+        });
+
+        return promise;
+      }
+
+      function save() {
+        var _this = this;
+
+        _this.progress.save = true;
+
+        var url = buildUrl(_this.url, null, _this);
+        
+        var data = _.pick(_this, _.keys(_this.schema));
+
+        var promise = $http({
+          method: 'POST',
+          url: url,
+          data: data
+        })
+        .then(function (response) {
+          _.assign(_this, response.data);
+
+          _this.relationalize();
+
+          return _this;
+        })
+        .finally(function () {
+          _this.progress.save = false;
+        });
+
+        return promise;
+      }
+
+      function remove(id) {
+        var _this = this;
+
+        _this.progress.remove = true;
+
+        var url = buildUrl(_this.url, id, _this);
+
+        var promise = $http({
+          method: 'DELETE',
+          url: url
+        })
+        .finally(function () {
+          _this.progress.remove = false;
+        });
+
+        return promise;
+      }
+      
+      function http(opts) {
+        var _this = this;
+        
+        _this.progress[opts.name] = true;
+        
+        opts.url = buildUrl(_this.url + opts.url, null, _this);
+        
+        var promise = $http(opts)
+        .finally(function () {
+          _this.progress[opts.name] = false;
+        });
+        
+        return promise;
+      }
+
+      function buildUrl(resourceUrl, id, model, params) {
+        resourceUrl = baseUrl + resourceUrl;
+
+        var match;
+        var url = resourceUrl;
+        var pattern = /:(\*)?[a-zA-Z0-9]+/g;
+
+        do {
+          match = pattern.exec(resourceUrl);
+
+          if (!match) continue;
+
+          var param = match[0];
+
+          var field = param.replace(/\W+/g, '');
+
+          if (param.indexOf('*') > -1 && id) url = url.replace(param, id);
+          else if (_.has(model, field) && !_.isNull(_.result(model, field)) && !_.isUndefined(_.result(model, field))) url = url.replace(param, _.result(model, field));
+        } while (match);
+
+        url = url.replace(/\/:\*[a-zA-Z0-9]+/g, '');
+
+        if (params) url += querystring(params);
+
+        return url;
+      }
+
+      function relationalize() {
+        var _this = this;
+        
+        if (!_.has(_this, 'relations') || _.keys(_this.relations).length === 0) return;
+
+        _.forIn(_this.relations, function (modelName, field) {
+          if (!_.has(_this, field)) return;
+
+          var datamodel = $injector.get(modelName);
+          _this[field] = datamodel.create(_this[field]);
+        });
+      }
+      
+      function querystring(params) {
+        var query = _.map(params, function (value, key) {
+          return key + '=' + encodeURIComponent(value);
+        }).join('&');
+    
+        if (query.length > 0) query = '?' + query;
+    
+        return query;
+      }
+    }
+  }
+
+}());
 (function () {
   'use strict';
 
@@ -587,7 +824,14 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
 
       var compareField = _.isString(opts) ? opts : opts.notEqualTo;
 
-      return value !== _.get(instance, compareField);
+      var compareValue = _.get(instance, compareField);
+
+      if (_.isString(value) && _.isString(compareValue)) {
+        value = value.toLowerCase();
+        compareValue = compareValue.toLowerCase();
+      }
+      
+      return value !== compareValue;
     }
   }
 
@@ -711,6 +955,11 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
       if (_.isNil(value)) return true;
       
       var otherValue = _.has(opts, 'equals') ? opts.equals : opts;
+
+      if (_.isString(value) && _.isString(otherValue)) {
+        value = value.toLowerCase();
+        otherValue = otherValue.toLowerCase();
+      }
 
       return _.isEqual(value, otherValue);
     }
@@ -1055,240 +1304,3 @@ angular.module("rentler.core").run(["$templateCache", function($templateCache) {
   }
 
 })();
-(function () {
-  'use strict';
-  
-  angular
-  	.module('rentler.core')
-	.factory('Instantiable', InstantiableFactory);
-	
-  InstantiableFactory.$inject = [];
-  
-  function InstantiableFactory() {
-	var mixin = {
-	  create: create
-	};
-	
-	return mixin;
-	
-	function create(opts) {
-	  var _this = this;
-	  
-	  var instance = _.cloneDeep(_this);
-	  
-	  _.assign(instance, opts);
-	  
-	  _.bindAll(instance, _.functions(instance));
-    
-	  return instance;
-	}
-  }
-  
-}());
-(function () {
-  'use strict';
-
-  angular
-    .module('rentler.core')
-    .provider('DataModel', DataModelProvider);
-
-  DataModelProvider.$inject = [];
-
-  function DataModelProvider() {
-    var baseUrl;
-
-    this.setBaseUrl = function (value) {
-      baseUrl = value;
-    };
-
-    this.$get = DataModel;
-
-    DataModel.$inject = ['$q', '$http', '$injector', 'Instantiable'];
-
-    function DataModel($q, $http, $injector, Instantiable) {
-      
-      var mixin = {
-        get: get,
-        list: list,
-        save: save,
-        remove: remove,
-        http: http,
-        relationalize: relationalize,
-        progress: { }
-      };
-      
-      _.assign(mixin, _.cloneDeep(Instantiable));
-
-      return mixin;
-
-      function get(id) {
-        var _this = this;
-
-        var url = buildUrl(_this.url, id, _this);
-
-        _this.progress.get = true;
-
-        var promise = $http({
-          method: 'GET',
-          url: url
-        })
-        .then(function (response) {
-
-          _.assign(_this, response.data);
-
-          _this.relationalize();
-
-          return _this;
-        })
-        .finally(function () {
-          _this.progress.get = false;
-        });
-
-        return promise;
-      }
-
-      function list(options) {
-        var _this = this;
-
-        _this.progress.list = true;
-
-        var url = buildUrl(_this.url, null, _this, options);
-
-        var promise = $http({
-          method: 'GET',
-          url: url
-        })
-        .then(function (response) {
-          _.assign(_this, response.data);
-
-          _.assign(_this, {
-            // Pager helper functions here
-          });
-
-          _.forEach(_this.items, function (item) {
-            item = _this.create(item);
-          });
-
-          return _this;
-        })
-        .finally(function () {
-          _this.progress.list = false;
-        });
-
-        return promise;
-      }
-
-      function save() {
-        var _this = this;
-
-        _this.progress.save = true;
-
-        var url = buildUrl(_this.url, null, _this);
-        
-        var data = _.pick(_this, _.keys(_this.schema));
-
-        var promise = $http({
-          method: 'POST',
-          url: url,
-          data: data
-        })
-        .then(function (response) {
-          _.assign(_this, response.data);
-
-          _this.relationalize();
-
-          return _this;
-        })
-        .finally(function () {
-          _this.progress.save = false;
-        });
-
-        return promise;
-      }
-
-      function remove(id) {
-        var _this = this;
-
-        _this.progress.remove = true;
-
-        var url = buildUrl(_this.url, id, _this);
-
-        var promise = $http({
-          method: 'DELETE',
-          url: url
-        })
-        .finally(function () {
-          _this.progress.remove = false;
-        });
-
-        return promise;
-      }
-      
-      function http(opts) {
-        var _this = this;
-        
-        _this.progress[opts.name] = true;
-        
-        opts.url = buildUrl(_this.url + opts.url, null, _this);
-        
-        var promise = $http(opts)
-        .finally(function () {
-          _this.progress[opts.name] = false;
-        });
-        
-        return promise;
-      }
-
-      function buildUrl(resourceUrl, id, model, params) {
-        resourceUrl = baseUrl + resourceUrl;
-
-        var match;
-        var url = resourceUrl;
-        var pattern = /:(\*)?[a-zA-Z0-9]+/g;
-
-        do {
-          match = pattern.exec(resourceUrl);
-
-          if (!match) continue;
-
-          var param = match[0];
-
-          var field = param.replace(/\W+/g, '');
-
-          if (param.indexOf('*') > -1 && id) url = url.replace(param, id);
-          else if (_.has(model, field) && !_.isNull(_.result(model, field)) && !_.isUndefined(_.result(model, field))) url = url.replace(param, _.result(model, field));
-        } while (match);
-
-        url = url.replace(/\/:\*[a-zA-Z0-9]+/g, '');
-
-        if (params) url += querystring(params);
-
-        return url;
-      }
-
-      function relationalize() {
-        var _this = this;
-        
-        if (!_.has(_this, 'relations') || _.keys(_this.relations).length === 0) return;
-
-        _.forIn(_this.relations, function (modelName, field) {
-          if (!_.has(_this, field)) return;
-
-          var datamodel = $injector.get(modelName);
-          _this[field] = datamodel.create(_this[field]);
-        });
-      }
-      
-      function querystring(params) {
-        var query = _.map(params, function (value, key) {
-          return key + '=' + encodeURIComponent(value);
-        }).join('&');
-    
-        if (query.length > 0) query = '?' + query;
-    
-        return query;
-      }
-    }
-  }
-
-}());
