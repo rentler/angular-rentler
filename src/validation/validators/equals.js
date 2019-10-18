@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   'use strict';
 
   angular
@@ -17,8 +17,9 @@
       if (_.isNil(value)) return true;
       
       var otherValue = _.has(opts, 'equals') ? opts.equals : opts;
+      var caseSensitive = _.has(opts, 'caseSensitive') ? opts.caseSensitive : false;
 
-      if (_.isString(value) && _.isString(otherValue)) {
+      if (_.isString(value) && _.isString(otherValue) && !caseSensitive) {
         value = value.toLowerCase();
         otherValue = otherValue.toLowerCase();
       }
