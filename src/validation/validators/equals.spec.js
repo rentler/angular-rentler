@@ -26,6 +26,10 @@
       expect(EqualsValidator.validate('TEST', {}, { equals: 'test', caseSensitive: true })).toBe(false);
     });
 
+    it('should validate to false when strings not equal', function () {
+      expect(EqualsValidator.validate('TEST', {}, { equals: 'TEST', caseSensitive: true })).toBe(false);
+    });
+
     it('should validate to false when numbers not equal', function () {
       expect(EqualsValidator.validate(1, {}, 2)).toBe(false);
     });
