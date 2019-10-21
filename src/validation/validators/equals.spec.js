@@ -18,6 +18,14 @@
       expect(EqualsValidator.validate('test', {}, 'test')).toBe(true);
     });
 
+    it('should validate to true when strings equal', function () {
+      expect(EqualsValidator.validate('TEST', {}, { equals: 'TEST', caseSensitive: true })).toBe(true);
+    });
+
+    it('should validate to false when strings not equal', function () {
+      expect(EqualsValidator.validate('TEST', {}, { equals: 'test', caseSensitive: true })).toBe(false);
+    });
+
     it('should validate to false when numbers not equal', function () {
       expect(EqualsValidator.validate(1, {}, 2)).toBe(false);
     });
