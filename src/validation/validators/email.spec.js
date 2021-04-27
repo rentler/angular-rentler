@@ -25,11 +25,15 @@
     it('should validate to true when a multi-suffix email', function () {
       expect(EmailValidator.validate('japoppy.test@student.neumont.edu', {}, true)).toBe(true);
     });
-    
+
+    it('should validate to true when given an email with a "+" (plus) symbol', function () {
+      expect(EmailValidator.validate('user+forpurpose@example.com', {}, true)).toBe(true);
+    });
+
     it('should validate to true when given undefined', function () {
       expect(EmailValidator.validate(undefined, {}, true)).toBe(true);
     });
-    
+
     it('should validate to true when given null', function () {
       expect(EmailValidator.validate(null, {}, true)).toBe(true);
     });
